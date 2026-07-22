@@ -19,7 +19,8 @@ A four-week (28-day) applied-AI engineering sprint building a portfolio of GTM (
 | 1 | `describe` warmup CLI — structured company profile via forced tool use + cost logging | `pytest -q` → 6 pass | ✅ |
 | 2 | `extract_lead()` — typed `Lead` with per-field confidence + evidence | `pytest -q` → 14 pass | ✅ |
 | 3 | Northstar knowledge corpus — 30 consistent docs for RAG | `check_corpus.sh` → exit 0 | ✅ |
-| 4–7 | RAG assistant: ingest → hybrid retrieval + rerank → answer + UI → golden evals → deploy | _tbd_ | ⏳ |
+| 4 | RAG ingestion — section chunking, Chroma + BM25, hybrid query | `gtm_kb.ingest` + `pytest` → 26 pass | ✅ |
+| 5–7 | RAG assistant: hybrid retrieval + rerank → cited answers + UI → golden evals → deploy | _tbd_ | ⏳ |
 | 8–28 | Account research agent, outbound generation, and more (Weeks 2–4) | _tbd_ | ☐ |
 
 **API spend to date:** `$0.00` — no live key yet; all Week-1 gates verified with deterministic mocks.
@@ -32,8 +33,10 @@ gtm-signal-intelligence/
 │   ├── src/gtm_cli_warmup/ describe.py · lead.py · cost.py · pricing.py · cli.py
 │   ├── tests/              offline mock-based tests (no API calls)
 │   └── notebooks/          lead-extractor demo (key-aware; FIXTURE fallback)
-├── gtm-knowledge-base/     Day 3 — Northstar corpus (30 docs) + integrity gate
+├── gtm-knowledge-base/     Days 3–4 — Northstar corpus + RAG retrieval layer
 │   ├── data/northstar/     product · sales · case-studies · marketing · company
+│   ├── src/gtm_kb/         chunker · embeddings · Chroma+BM25 · ingest · query
+│   ├── tests/              26 offline tests
 │   └── scripts/            check_corpus.sh
 ├── .genesis/               engineering spine — plan, milestones, decisions, context graph
 └── gtm_ai_sprint_master_plan.md   the full 4-week roadmap
@@ -50,6 +53,11 @@ python -m venv .venv && .venv/bin/pip install -e ".[dev]"
 # Day 3 — knowledge corpus integrity
 cd ../gtm-knowledge-base
 bash scripts/check_corpus.sh           # -> CORPUS OK (exit 0)
+
+# Day 4 — RAG ingestion + retrieval (offline, no API key needed)
+python -m venv .venv && .venv/bin/pip install -e ".[dev]"
+.venv/bin/python -m gtm_kb.ingest      # -> 30 docs, 177 chunks (Chroma + BM25)
+.venv/bin/python -m pytest -q          # -> 26 passed
 ```
 
 ## Highlights so far

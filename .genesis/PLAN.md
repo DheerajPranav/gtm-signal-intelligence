@@ -77,9 +77,12 @@ carries its own computed gate, and the flagship (Week 2) composes parts that alr
 - **Token budget:** 50000 (authored directly — no live API cost)
 - **Status:** shipped 2026-07-22. 30 docs authored + 2 READMEs + `check_corpus.sh` (bash-3.2 compatible). Gate exit 0: per-category counts (7/10/4/5/4), frontmatter on all 30, canonical facts consistent (ICP 200–2000 / Series B–D / $20M–$200M, competitors Clari/Gong/Mosaic/Pigment, pricing $2,500/$6,000, metrics 90%+/6h→30min/4–6wk/+12%), contradiction guard clean. All customers/leaders/analysts labelled fictional — no invented model output presented as real.
 
-### M4 — Day 4: RAG stack setup + ingestion  ⏳ upcoming
-- **Outcome:** corpus chunked, embedded, indexed; sanity query returns relevant chunks.
-- **Demo command:** _tbd Day 4_
+### M4 — Day 4: RAG stack setup + ingestion  ✅ DONE
+- **Outcome:** corpus chunked, embedded, indexed (Chroma + BM25); `query()` returns attributable chunks; sanity query works.
+- **Files:** `gtm-knowledge-base/src/gtm_kb/**`, `gtm-knowledge-base/tests/**`, `gtm-knowledge-base/pyproject.toml`
+- **Demo command:** `cd gtm-knowledge-base && .venv/bin/python -m gtm_kb.ingest && .venv/bin/python -m pytest -q`
+- **Success criteria:** ingest runs clean (30 docs → 177 chunks); Chroma + BM25 persisted; hybrid/vector/bm25 query modes; results attributable.
+- **Status:** shipped 2026-07-23. 26 offline tests pass. Lean stack (Chroma + rank_bm25 + direct chunker) with a pluggable key-aware embedder; offline default = fitted deterministic TF-IDF hashing (zero API cost). See [ADR 0001](decisions/0001-lean-rag-stack.md). Offline lexical limitation on out-of-vocab queries documented + tested.
 
 ### M5 — Day 5: Hybrid retrieval + reranking + answer generation + UI  ⏳ upcoming
 ### M6 — Day 6: Golden eval set (35 Qs) + eval harness  ⏳ upcoming
@@ -92,3 +95,4 @@ carries its own computed gate, and the flagship (Week 2) composes parts that alr
 - **M1 — Day 1 warmup CLI** — shipped 2026-07-20. 6/6 tests pass. Structured output via forced tool use; promo-aware pricing table; cost logged to `runs.jsonl`. Open: live run pending API key. (committed `day-01:` in gtm-cli-warmup)
 - **M2 — Day 2 lead extractor** — shipped 2026-07-22. 8 offline tests (total suite 14/14 green). `extract_lead()` forces tool use, disables thinking, fences untrusted source text in user content only, records cost. Notebook staged with 6 synthetic inputs + gold labels; FIXTURE fallback when no key. Open: live sample run pending API key.
 - **M3 — Day 3 Northstar corpus** — shipped 2026-07-22. 30 consistent docs + 2 READMEs; `check_corpus.sh` gate exit 0 (counts, frontmatter, canonical-fact consistency, contradiction guard). All fictional entities labelled. Ready for Day-4 RAG ingestion.
+- **M4 — Day 4 RAG ingestion** — shipped 2026-07-23. `gtm_kb` package: section chunker, Chroma + BM25 over 177 chunks, RRF hybrid query, pluggable key-aware embedder (offline TF-IDF default, $0). 26 offline tests. [ADR 0001](decisions/0001-lean-rag-stack.md) records the lean-stack + offline-embedder decision.

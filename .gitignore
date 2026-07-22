@@ -28,6 +28,10 @@ env/
 runs.jsonl
 *.log
 
+# Generated RAG indexes (rebuilt by `python -m gtm_kb.ingest`)
+.index/
+.chroma*/
+
 # Personal job-market research — not part of this project
 gtm-engineer.json
 
