@@ -1,0 +1,39 @@
+{
+  "$comment": "Per-project causal/dependency graph. nodes=modules/files, edges=[cause,effect] (cause is imported-by effect), invariants=health rules the L4 verifier checks before declaring done. Regenerate the skeleton with tools/graphizer.mjs; add invariants BY HAND.",
+  "project": "gtm-signal-intelligence",
+  "generated": "2026-07-22",
+  "nodes": [
+    "gtm-cli-warmup/src/gtm_cli_warmup/models.py",
+    "gtm-cli-warmup/src/gtm_cli_warmup/pricing.py",
+    "gtm-cli-warmup/src/gtm_cli_warmup/cost.py",
+    "gtm-cli-warmup/src/gtm_cli_warmup/describe.py",
+    "gtm-cli-warmup/src/gtm_cli_warmup/cli.py",
+    "gtm-cli-warmup/src/gtm_cli_warmup/lead.py",
+    "gtm-cli-warmup/notebooks/lead_extractor/lead_extractor.ipynb",
+    "gtm-knowledge-base/data/northstar/**"
+  ],
+  "edges": [
+    ["gtm-cli-warmup/src/gtm_cli_warmup/models.py", "gtm-cli-warmup/src/gtm_cli_warmup/describe.py"],
+    ["gtm-cli-warmup/src/gtm_cli_warmup/pricing.py", "gtm-cli-warmup/src/gtm_cli_warmup/cost.py"],
+    ["gtm-cli-warmup/src/gtm_cli_warmup/cost.py", "gtm-cli-warmup/src/gtm_cli_warmup/describe.py"],
+    ["gtm-cli-warmup/src/gtm_cli_warmup/describe.py", "gtm-cli-warmup/src/gtm_cli_warmup/cli.py"],
+    ["gtm-cli-warmup/src/gtm_cli_warmup/lead.py", "gtm-cli-warmup/notebooks/lead_extractor/lead_extractor.ipynb"],
+    ["gtm-cli-warmup/src/gtm_cli_warmup/cost.py", "gtm-cli-warmup/src/gtm_cli_warmup/lead.py"]
+  ],
+  "invariants": {
+    "structured-output": "Every LLM call that returns data uses forced tool use with a schema derived from a Pydantic model — never string/regex parsing of prose.",
+    "cost-logged": "Every billed LLM call writes one JSONL line (tokens, cost, latency, stop_reason) even on exception — cost.py flushes in finally.",
+    "pricing-honest": "Unknown model ids raise in pricing.rates_for(); they never silently price at $0.",
+    "untrusted-input": "Lead/company source text is untrusted; it is passed only as user content and must not be able to change tool_choice or system policy.",
+    "no-invented-output": "No LLM output is fabricated into docs/READMEs. Live-run sections stay empty until a real key produces them; offline tests use explicit mocks.",
+    "kb-consistency": "All Northstar KB docs share one ICP, one competitor set (Clari, Gong Forecast, Mosaic, Pigment), and one pricing table."
+  },
+  "freeze_boundary": [
+    "$comment: globs the driver may edit; everything else is off-limits without explicit user request",
+    "gtm-cli-warmup/src/**",
+    "gtm-cli-warmup/tests/**",
+    "gtm-cli-warmup/notebooks/**",
+    "gtm-knowledge-base/**",
+    ".genesis/**"
+  ]
+}

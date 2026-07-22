@@ -1,0 +1,13 @@
+# CURRENT
+- active_loop: L1 BUILD
+- target: M3 (Day 3 · Northstar KB corpus) — M1 done, M2 building alongside
+- iteration: 1
+- last_gate: G5 VERIFY — M1 tests 6/6 green (computed)
+- last_action: scaffolded .genesis spine; populated PLAN/DONE/graph; building Day 2 + Day 3
+- next_action: finish Day 2 lead extractor + tests; author 30 Northstar docs; update SPRINT_LOG
+- model: claude-opus-4-8 (this session's driver)
+- tokens_used: n/a (interactive session, not a metered loop)
+- tokens_budget: 50000/milestone
+- skills_loaded: [genesis]
+- blockers: no ANTHROPIC_API_KEY → live LLM runs deferred (Day 1 sample, Day 2 notebook exec). Offline mock tests substitute.
+- open_decision: repo name + git topology (monorepo vs per-day repos) — awaiting user confirm before rename/push
