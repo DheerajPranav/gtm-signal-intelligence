@@ -20,7 +20,8 @@ A four-week (28-day) applied-AI engineering sprint building a portfolio of GTM (
 | 2 | `extract_lead()` — typed `Lead` with per-field confidence + evidence | `pytest -q` → 14 pass | ✅ |
 | 3 | Northstar knowledge corpus — 30 consistent docs for RAG | `check_corpus.sh` → exit 0 | ✅ |
 | 4 | RAG ingestion — section chunking, Chroma + BM25, hybrid query | `gtm_kb.ingest` + `pytest` → 26 pass | ✅ |
-| 5–7 | RAG assistant: hybrid retrieval + rerank → cited answers + UI → golden evals → deploy | _tbd_ | ⏳ |
+| 5 | RAG assistant — hybrid retrieval + rerank → cited answers + Streamlit UI + cost tracking | `streamlit run app.py` + `pytest` → 33 pass | ✅ |
+| 6–7 | Golden eval set (35 Qs) + eval harness → deploy + Loom + LinkedIn ship | _tbd_ | ⏳ |
 | 8–28 | Account research agent, outbound generation, and more (Weeks 2–4) | _tbd_ | ☐ |
 
 **API spend to date:** `$0.00` — no live key yet; all Week-1 gates verified with deterministic mocks.

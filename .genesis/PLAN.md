@@ -84,7 +84,13 @@ carries its own computed gate, and the flagship (Week 2) composes parts that alr
 - **Success criteria:** ingest runs clean (30 docs → 177 chunks); Chroma + BM25 persisted; hybrid/vector/bm25 query modes; results attributable.
 - **Status:** shipped 2026-07-23. 26 offline tests pass. Lean stack (Chroma + rank_bm25 + direct chunker) with a pluggable key-aware embedder; offline default = fitted deterministic TF-IDF hashing (zero API cost). See [ADR 0001](decisions/0001-lean-rag-stack.md). Offline lexical limitation on out-of-vocab queries documented + tested.
 
-### M5 — Day 5: Hybrid retrieval + reranking + answer generation + UI  ⏳ upcoming
+### M5 — Day 5: Hybrid retrieval + reranking + answer generation + UI  ✅ DONE
+- **Outcome:** Haiku reranker (top 20 → top 5) + Sonnet answer generator with inline citations + Streamlit UI + cost/latency tracking.
+- **Files:** `gtm-knowledge-base/src/gtm_kb/{models,reranker,answer_gen,rag}.py`, `gtm-knowledge-base/app.py`, `gtm-knowledge-base/tests/test_day5_rag.py`
+- **Demo command:** `cd gtm-knowledge-base && streamlit run app.py` (interactive UI) or offline: `.venv/bin/python -m pytest -q` (7 new tests, 33 total)
+- **Success criteria:** RAGAssistant orchestrates retrieve→rerank→answer; answers include citations; cost/latency logged; Streamlit UI runs locally; tests green.
+- **Status:** shipped 2026-07-23. 7 new offline tests (33 total: 26 Day 4 + 7 Day 5). RAGAssistant with RRF hybrid retrieval (20 candidates), Haiku reranker (top 5), Sonnet answer generator with `[source: doc#section]` citations. Streamlit UI with expandable source chunks, cost/latency metrics, query history. Pricing built in (Haiku $0.80/$4.00, Sonnet $3.00/$15.00 per 1M tokens).
+
 ### M6 — Day 6: Golden eval set (35 Qs) + eval harness  ⏳ upcoming
 ### M7 — Day 7: Deploy + Loom + LinkedIn ship  ⏳ upcoming
 
@@ -96,3 +102,4 @@ carries its own computed gate, and the flagship (Week 2) composes parts that alr
 - **M2 — Day 2 lead extractor** — shipped 2026-07-22. 8 offline tests (total suite 14/14 green). `extract_lead()` forces tool use, disables thinking, fences untrusted source text in user content only, records cost. Notebook staged with 6 synthetic inputs + gold labels; FIXTURE fallback when no key. Open: live sample run pending API key.
 - **M3 — Day 3 Northstar corpus** — shipped 2026-07-22. 30 consistent docs + 2 READMEs; `check_corpus.sh` gate exit 0 (counts, frontmatter, canonical-fact consistency, contradiction guard). All fictional entities labelled. Ready for Day-4 RAG ingestion.
 - **M4 — Day 4 RAG ingestion** — shipped 2026-07-23. `gtm_kb` package: section chunker, Chroma + BM25 over 177 chunks, RRF hybrid query, pluggable key-aware embedder (offline TF-IDF default, $0). 26 offline tests. [ADR 0001](decisions/0001-lean-rag-stack.md) records the lean-stack + offline-embedder decision.
+- **M5 — Day 5 RAG assistant + UI** — shipped 2026-07-23. RAGAssistant orchestrator: hybrid retrieval (20 candidates) → Haiku reranker (top 5) → Sonnet answer generator with `[source: doc#section]` citations. Streamlit UI with expandable chunks, cost/latency metrics, query history. 7 new tests (33 total). Ready for Day-6 eval harness.
