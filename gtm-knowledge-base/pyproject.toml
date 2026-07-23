@@ -1,12 +1,15 @@
 [project]
 name = "gtm-kb"
 version = "0.1.0"
-description = "Northstar knowledge-base RAG: section-based ingestion into Chroma + BM25 with a pluggable, key-aware embedder."
+description = "Northstar knowledge-base RAG: section-based ingestion into Chroma + BM25 with a pluggable, key-aware embedder. Day 5: reranking, cited answers, and Streamlit UI."
 requires-python = ">=3.11"
 dependencies = [
     "chromadb>=0.5",
     "rank-bm25>=0.2.2",
     "numpy>=1.26",
+    "anthropic>=0.28",
+    "pydantic>=2.0",
+    "streamlit>=1.28",
 ]
 
 [project.optional-dependencies]
