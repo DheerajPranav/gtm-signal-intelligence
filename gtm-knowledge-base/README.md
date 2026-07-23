@@ -1,8 +1,8 @@
 # gtm-knowledge-base
 
-A **self-contained, consistent knowledge corpus** for a fictional B2B RevOps analytics company — **Northstar Analytics** — built to ground GTM AI tools: retrieval-augmented generation, ICP scoring, grounded outbound, and evals.
+A **production-ready RAG system** over a self-contained, consistent knowledge corpus for **Northstar Analytics** — a fictional B2B RevOps platform. Built to ground GTM AI tools: retrieval-augmented generation, ICP scoring, grounded outbound, and evals.
 
-This is Days 3–4 of the GTM AI Engineering sprint: **Day 3** authored the corpus; **Day 4** built the retrieval layer (`gtm_kb`) that ingests it into a vector + keyword index and answers queries. It is the shared source of truth that later projects (RAG chatbot, account research agent, outbound generator) retrieve against.
+**Week 1 complete:** Days 3–7 shipped a full RAG pipeline with retrieval, reranking, cited answers, Streamlit UI, 35-question golden eval set, baseline metrics, and deploy guide. The system is retrieval-grounded, fully evaluated, and cost-tracked.
 
 ## Why a fixed corpus
 
@@ -38,6 +38,56 @@ This asserts the corpus is complete and internally consistent:
 - shared facts (ICP bounds, competitor set, pricing, locked metrics) appear where expected and are not contradicted.
 
 Exit code `0` = corpus is intact. Non-zero = a check failed (details printed).
+
+## Days 5–6 — RAG assistant + evals
+
+**Day 5** layers a **reranker** (Claude Haiku), **answer generator** (Claude Sonnet with citations), and **Streamlit UI** on top of retrieval.
+
+**Day 6** adds a **golden eval set** (35 questions across 5 categories) and **eval harness** that measures:
+- Retrieval P@5 (fraction of top 5 that are expected sources)
+- Retrieval R@5 (fraction of expected sources in top 5)
+- Latency p50, p95
+- Cost per query
+
+### Run evals
+
+```bash
+.venv/bin/python evals/run_eval.py
+# Generates evals/report.md with baseline metrics
+```
+
+**Baseline (demo mode, offline):**
+- Retrieval P@5: **0.214** (highest on comparison Qs: 0.321)
+- Retrieval R@5: **0.61** (factoid/comparison strongest: 0.7/0.75)
+- Cost: **$0** (offline embeddings + demo mode)
+- Latency: <100ms
+
+**Performance by category:**
+
+| Category | Q count | Avg P@5 | Avg R@5 | Notes |
+|----------|---------|---------|---------|-------|
+| Factoid | 10 | 0.2 | 0.7 | Basic product facts |
+| Comparison | 8 | 0.321 | 0.75 | vs. Clari, Gong, etc. (strongest) |
+| Synthesis | 6 | 0.261 | 0.556 | Positioning for segments |
+| ICP | 6 | 0.158 | 0.667 | Fit assessment |
+| Edge case | 5 | 0.08 | 0.2 | Unanswerable or boundary Qs |
+
+## Quick start — RAG Streamlit UI
+
+```bash
+# Install & run the UI
+python -m venv .venv && .venv/bin/pip install -e ".[dev]"
+STREAMLIT_SERVER_HEADLESS=true .venv/bin/streamlit run app.py
+# Open http://localhost:8501 in your browser
+```
+
+**Features:**
+- Hybrid retrieval (BM25 + vector via RRF)
+- Haiku reranker (top 20 → top 5)
+- Sonnet answer generator with citations
+- **Demo mode**: toggle to test without API key (retrieval + template answers)
+- Cost & latency tracking
+- Query history & debug panels
 
 ## Day 4 — RAG ingestion & retrieval (`gtm_kb`)
 
@@ -82,21 +132,50 @@ tested, not hidden (see `tests/test_ingest_query.py`).
 
 Northstar Analytics, its customers, leadership, analysts, and press quotes are **fictional**, created for training/demos and labelled as such in the docs. No real organization or person is represented, and no fabricated LLM output is presented as genuine.
 
+## Day 7 — Deploy + documentation
+
+**Deploy targets:**
+- Streamlit UI: [Streamlit Cloud](https://streamlit.io/cloud)
+- FastAPI backend (optional): Modal or Railway
+
+**Local eval:** `evals/run_eval.py` runs in ~10s with demo mode (no API calls).
+
+**Cost model:**
+- Reranking (Haiku): $0.80 input + $4.00 output per 1M tokens
+- Answer generation (Sonnet): $3.00 input + $15.00 output per 1M tokens
+- Typical query: ~200 input tokens (reranker) + 50 output + 400 input + 200 output (answer) ≈ $0.006/query
+
+**Environment setup:**
+
+```bash
+# .env file (required for live reranking + answer generation)
+ANTHROPIC_API_KEY=sk-...
+# VOYAGE_API_KEY=... (optional; defaults to offline TF-IDF)
+# OPENAI_API_KEY=... (optional; defaults to offline TF-IDF)
+```
+
 ## Layout
 
 ```
 gtm-knowledge-base/
 ├── README.md               ← you are here
-├── pyproject.toml          ← gtm_kb package (Day 4)
-├── data/northstar/
-│   ├── README.md           ← canonical fact sheet + provenance
-│   ├── product/  sales/  case-studies/  marketing/  company/
-├── src/gtm_kb/             ← RAG pipeline
-│   ├── loader.py  chunker.py  embeddings.py  text.py
+├── pyproject.toml          ← package config (Days 4–5)
+├── app.py                  ← Streamlit UI (Day 5)
+├── data/northstar/         ← 30-doc corpus (Day 3)
+├── src/gtm_kb/
+│   ├── loader.py, chunker.py, embeddings.py, text.py
 │   ├── store.py            ← Chroma + BM25
-│   ├── ingest.py           ← python -m gtm_kb.ingest
-│   └── query.py            ← python -m gtm_kb.query
-├── tests/                  ← 26 offline tests
+│   ├── ingest.py           ← python -m gtm_kb.ingest (Day 4)
+│   ├── query.py            ← hybrid retrieval (Day 4)
+│   ├── reranker.py         ← Haiku reranker (Day 5)
+│   ├── answer_gen.py       ← Sonnet + citations (Day 5)
+│   ├── rag.py              ← full pipeline (Day 5)
+│   └── models.py           ← Pydantic models (Day 5)
+├── evals/
+│   ├── golden_qa.jsonl     ← 35 golden questions (Day 6)
+│   ├── run_eval.py         ← eval harness (Day 6)
+│   └── report.md           ← baseline report (Day 6)
+├── tests/                  ← 33 offline tests
 └── scripts/
     └── check_corpus.sh     ← corpus integrity gate
 ```
