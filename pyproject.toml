@@ -2,7 +2,7 @@
 name = "gtm-outbound-agent"
 version = "0.1.0"
 description = "Multi-agent GTM outbound system: research, scoring, personas, writing, critique. With optional v2 learning loop (episodic + semantic + procedural memory)."
-requires-python = ">=3.11"
+requires-python = ">=3.10"
 dependencies = [
     "anthropic>=0.28",
     "pydantic>=2.0",
