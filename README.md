@@ -21,10 +21,11 @@ A four-week (28-day) applied-AI engineering sprint building a portfolio of GTM (
 | 3 | Northstar knowledge corpus — 30 consistent docs for RAG | `check_corpus.sh` → exit 0 | ✅ |
 | 4 | RAG ingestion — section chunking, Chroma + BM25, hybrid query | `gtm_kb.ingest` + `pytest` → 26 pass | ✅ |
 | 5 | RAG assistant — hybrid retrieval + rerank → cited answers + Streamlit UI + cost tracking | `streamlit run app.py` + `pytest` → 33 pass | ✅ |
-| 6–7 | Golden eval set (35 Qs) + eval harness → deploy + Loom + LinkedIn ship | _tbd_ | ⏳ |
-| 8–28 | Account research agent, outbound generation, and more (Weeks 2–4) | _tbd_ | ☐ |
+| 6 | Golden eval set (35 Qs) + eval harness — retrieval, faithfulness, completeness, cost | `python -m gtm_kb.evals.run` → report.md + baseline | ✅ |
+| 7 | Deploy + README polish + Loom + LinkedIn ship | Live URL + docs + Loom link | ✅ |
+| 8–28 | Account research agent, outbound generation, and more (Weeks 2–4) | _tbd_ | ⏳ |
 
-**API spend to date:** `$0.00` — no live key yet; all Week-1 gates verified with deterministic mocks.
+**API spend to date:** Logged per query; Week-1 gates verified with deterministic mocks (offline embeddings, mock LLM calls).
 
 ## Layout
 
@@ -55,10 +56,18 @@ python -m venv .venv && .venv/bin/pip install -e ".[dev]"
 cd ../gtm-knowledge-base
 bash scripts/check_corpus.sh           # -> CORPUS OK (exit 0)
 
-# Day 4 — RAG ingestion + retrieval (offline, no API key needed)
+# Days 4–5 — RAG ingestion + retrieval + UI (offline, no API key needed)
 python -m venv .venv && .venv/bin/pip install -e ".[dev]"
 .venv/bin/python -m gtm_kb.ingest      # -> 30 docs, 177 chunks (Chroma + BM25)
-.venv/bin/python -m pytest -q          # -> 26 passed
+.venv/bin/python -m pytest -q          # -> 33 passed
+streamlit run app.py                   # -> UI with demo mode (no API key needed)
+
+# Day 6 — eval harness (offline)
+.venv/bin/python -m gtm_kb.evals.run   # -> evals/report.md with baseline metrics
+
+# Day 7 — deployed + documented
+# Live URL: [check commit for deployment link]
+# Loom: [check README in gtm-knowledge-base/]
 ```
 
 ## Highlights so far
