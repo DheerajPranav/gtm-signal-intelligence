@@ -130,6 +130,20 @@ carries its own computed gate, and the flagship (Week 2) composes parts that alr
   Episodic-admission thresholds are executable (`decide_memory_write`) rather than a comment,
   so writer / eval / consolidation cannot drift apart.
 
+### M9 — Day 9: Research agent (sourced enrichment)  ✅ DONE (live run blocked)
+- **Files:** `gtm-outbound-agent/src/gtm_outbound/{agents/research_agent,tools/web}.py`, `evals/`
+- **Demo command:** `cd gtm-outbound-agent && .venv/bin/python -m pytest -q` → 64 passed
+- **DoD:** `enrich()` returns a valid sourced profile ✅ (fake-client) · every field carries
+  `source_url` ✅ (enforced by the tool schema) · ≥70% field accuracy ⛔ **not measured**
+- **Status:** shipped 2026-07-24. Bounded 8-call tool loop; `CompanyProfile` fields became
+  `Sourced[T]`; unsourceable fields are omitted rather than guessed, with `coverage()`
+  separating "wrong" from "not found". Tool results are fenced per-result as untrusted
+  (web content is attacker-controllable, and unlike Day 2 it arrives repeatedly mid-run).
+- **Deliberate non-deliverable:** field accuracy is unmeasured. The gold set has 10 real
+  companies with **empty** ground truth — asserting real companies' headcount/funding from
+  memory would score the agent against guesses. `verified: false` rows are excluded and the
+  harness reports `not measured`. Mutation-verified: removing the gate yields a false 1.0.
+
 ---
 
 ## Progress (loops append here on milestone completion — newest last)
