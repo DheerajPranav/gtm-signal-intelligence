@@ -35,7 +35,11 @@ class CitedAnswer(BaseModel):
     )
     cited_chunks: list[RankedChunk] = Field(
         default_factory=list,
-        description="Ranked source chunks the answer cited"
+        description="Only the chunks the answer actually cited, in first-citation order"
+    )
+    unresolved_citations: list[str] = Field(
+        default_factory=list,
+        description="Citations the model emitted that match no supplied chunk — grounding failures"
     )
     usage: dict = Field(
         default_factory=dict,
@@ -51,8 +55,15 @@ class QueryResult(BaseModel):
     answer_text: str
     citations: list[Citation]
     top_chunks_for_debug: list[RankedChunk]
+    unresolved_citations: list[str] = Field(
+        default_factory=list,
+        description="Citations matching no retrieved chunk — surfaced, not hidden"
+    )
     tokens_used: int = 0
     cost_usd: float = 0.0
     latency_ms: float = 0.0
+    retrieval_latency_ms: float = 0.0
+    rerank_latency_ms: float = 0.0
+    answer_latency_ms: float = 0.0
 
     model_config = ConfigDict(extra="forbid")

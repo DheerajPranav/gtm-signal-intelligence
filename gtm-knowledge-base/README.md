@@ -43,34 +43,47 @@ Exit code `0` = corpus is intact. Non-zero = a check failed (details printed).
 
 **Day 5** layers a **reranker** (Claude Haiku), **answer generator** (Claude Sonnet with citations), and **Streamlit UI** on top of retrieval.
 
-**Day 6** adds a **golden eval set** (35 questions across 5 categories) and **eval harness** that measures:
-- Retrieval P@5 (fraction of top 5 that are expected sources)
-- Retrieval R@5 (fraction of expected sources in top 5)
-- Latency p50, p95
-- Cost per query
+**Day 6** adds a **golden eval set** (35 questions across 5 categories) and an **eval
+harness** measuring four retrieval metrics plus two LLM-judge answer metrics.
+
+> **Why not P@5?** An earlier version of this harness reported "P@5", but divided hits
+> by the count of *unique docs retrieved* rather than by k — so the denominator varied
+> per question and the values were not comparable. Compounding it, 24 of the 35
+> questions have exactly one expected source, capping document precision near 0.2 on
+> most of the set. The reported 0.214 was effectively at its ceiling while reading like
+> a failure. It has been replaced by four metrics that each have a real 1.0 ceiling.
 
 ### Run evals
 
 ```bash
-.venv/bin/python evals/run_eval.py
-# Generates evals/report.md with baseline metrics
+.venv/bin/python evals/run_eval.py          # retrieval only, no API key, $0
+.venv/bin/python evals/run_eval.py --full   # + faithfulness & completeness judges
 ```
 
-**Baseline (demo mode, offline):**
-- Retrieval P@5: **0.214** (highest on comparison Qs: 0.321)
-- Retrieval R@5: **0.61** (factoid/comparison strongest: 0.7/0.75)
-- Cost: **$0** (offline embeddings + demo mode)
-- Latency: <100ms
+**Baseline — retrieval-only run, k=5, $0.00:**
 
-**Performance by category:**
+| Metric | Value | Reads as |
+|---|---|---|
+| Hit rate@5 | **0.743** | a gold doc surfaced for 74% of questions |
+| Recall@5 | **0.610** | 61% of all gold docs retrieved |
+| Chunk precision@5 | **0.274** | 27% of the context window was on-target |
+| MRR@5 | **0.510** | first gold chunk lands around rank 2 |
 
-| Category | Q count | Avg P@5 | Avg R@5 | Notes |
-|----------|---------|---------|---------|-------|
-| Factoid | 10 | 0.2 | 0.7 | Basic product facts |
-| Comparison | 8 | 0.321 | 0.75 | vs. Clari, Gong, etc. (strongest) |
-| Synthesis | 6 | 0.261 | 0.556 | Positioning for segments |
-| ICP | 6 | 0.158 | 0.667 | Fit assessment |
-| Edge case | 5 | 0.08 | 0.2 | Unanswerable or boundary Qs |
+Faithfulness, completeness, latency and cost print as **not measured** in this mode.
+They are never estimated — an unmeasured metric is not rendered as a number.
+
+**By category:**
+
+| Category | Q count | Hit rate@5 | Recall@5 | Notes |
+|----------|---------|-----------|----------|-------|
+| Comparison | 8 | 0.875 | 0.750 | vs Clari/Gong/Mosaic/Pigment — strongest |
+| Synthesis | 6 | 0.833 | 0.556 | positioning for segments |
+| Factoid | 10 | 0.800 | 0.700 | product facts, pricing |
+| ICP | 6 | 0.667 | 0.667 | fit assessment |
+| Edge case | 5 | 0.400 | 0.200 | deliberately unanswerable / boundary |
+
+Edge cases scoring lowest is expected and desirable: several have no good answer in the
+corpus, and the correct behaviour is to retrieve little and refuse.
 
 ## Quick start — RAG Streamlit UI
 

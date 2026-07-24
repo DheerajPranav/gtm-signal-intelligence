@@ -1,97 +1,155 @@
-"""Reranker: use Claude Haiku to rerank top candidates based on question relevance."""
+"""Reranker: Claude Haiku reorders retrieval candidates by relevance to the question.
+
+The model sees a truncated pool (RERANK_POOL) and returns 1-based indices into it.
+Every assumption about that response is checked — the model can return duplicates,
+out-of-range indices, non-integers, or prose instead of JSON, and none of those may
+corrupt the ranking or crash the pipeline.
+"""
 
 from __future__ import annotations
 
 import json
+import re
 import time
-from pathlib import Path
-
-from anthropic import Anthropic
+from typing import Any, Optional
 
 from .models import RankedChunk
 from .query import Result
+
+DEFAULT_RERANK_MODEL = "claude-3-5-haiku-20241022"
+RERANK_POOL = 20  # candidates shown to the model
+SNIPPET_CHARS = 400
+
+SYSTEM_PROMPT = """You rank passages by how well they answer a question.
+
+Reply with ONLY a JSON array of 1-based candidate indices, most relevant first, e.g. [3,1,7].
+Omit candidates that do not help answer the question. Never invent an index. Output no prose."""
+
+
+def _snippet(text: str) -> str:
+    flat = " ".join(text.split())
+    return flat if len(flat) <= SNIPPET_CHARS else flat[:SNIPPET_CHARS] + "…"
+
+
+def _parse_ranking(raw: str, pool_size: int) -> list[int]:
+    """Extract a clean, deduplicated, in-range list of 1-based indices.
+
+    Tolerates the model wrapping JSON in prose or code fences. Returns [] when
+    nothing usable is found, letting the caller fall back to retrieval order.
+    """
+    candidates: list[Any] = []
+
+    try:
+        candidates = json.loads(raw.strip())
+    except (json.JSONDecodeError, ValueError):
+        # Salvage the first bracketed run of digits, e.g. "Here you go: [2, 5, 1]".
+        match = re.search(r"\[[\s\d,]*\]", raw)
+        if match:
+            try:
+                candidates = json.loads(match.group(0))
+            except (json.JSONDecodeError, ValueError):
+                candidates = []
+
+    if not isinstance(candidates, list):
+        return []
+
+    cleaned: list[int] = []
+    seen: set[int] = set()
+    for item in candidates:
+        # Reject bools explicitly: bool is a subclass of int in Python.
+        if isinstance(item, bool) or not isinstance(item, int):
+            continue
+        if not (1 <= item <= pool_size) or item in seen:
+            continue
+        seen.add(item)
+        cleaned.append(item)
+
+    return cleaned
 
 
 def rerank(
     question: str,
     candidates: list[Result],
     top_k: int = 5,
-    model: str = "claude-3-5-haiku-20241022",
+    model: str = DEFAULT_RERANK_MODEL,
+    client: Optional[Any] = None,
 ) -> tuple[list[RankedChunk], dict]:
-    """Rerank candidates using Claude Haiku. Returns ranked chunks and usage stats.
+    """Rerank retrieval candidates with a cheap model.
 
     Args:
-        question: The original question to rank for.
-        candidates: List of Result objects from hybrid retrieval.
-        top_k: Number of top results to return after reranking.
-        model: Claude model to use for reranking.
+        question: The question to rank against.
+        candidates: Hybrid-retrieval results.
+        top_k: How many chunks to return.
+        model: Claude model to use.
+        client: Injected Anthropic client. Defaults to a real one — tests pass a fake.
 
     Returns:
-        Tuple of (reranked chunks, usage dict with tokens and cost).
+        (reranked chunks, usage dict). Usage carries `fell_back=True` when the
+        model's response was unusable and retrieval order was kept instead.
     """
-    client = Anthropic()
+    if not candidates:
+        return [], {
+            "reranker_model": model,
+            "input_tokens": 0,
+            "output_tokens": 0,
+            "latency_ms": 0.0,
+            "fell_back": False,
+        }
 
-    # Format candidates for Claude to judge
+    # The model only ever sees this slice, so indices must be validated against it —
+    # not against the full candidate list, or we'd accept an index for a chunk the
+    # model never saw and silently promote an unranked result.
+    pool = candidates[:RERANK_POOL]
+
+    if client is None:
+        from anthropic import Anthropic
+
+        client = Anthropic()
+
     candidate_text = "\n\n".join(
-        f"[{i+1}] {c.metadata.get('doc_title')} › {c.metadata.get('section_title')}\n"
-        f"Source: {c.metadata.get('source_path')}\n"
-        f"Content: {c.text[:300]}..."
-        for i, c in enumerate(candidates[:20])  # Rerank only top 20
+        f"[{i}] {c.metadata.get('doc_title')} › {c.metadata.get('section_title')}\n"
+        f"{_snippet(c.text)}"
+        for i, c in enumerate(pool, 1)
     )
-
-    prompt = f"""You are a relevance ranker. Given a question and candidate passages, rank them by how well they answer the question.
-
-Question: {question}
-
-Candidates:
-{candidate_text}
-
-Return a JSON array of candidate indices [1-based] in order of relevance. Only include candidates that are relevant to the question. Example format:
-[2, 5, 1, 7, 3]
-
-Respond ONLY with the JSON array, no other text."""
+    user_content = f"Question: {question}\n\nCandidates:\n{candidate_text}"
 
     start = time.time()
     response = client.messages.create(
         model=model,
-        max_tokens=100,
-        messages=[{"role": "user", "content": prompt}],
+        max_tokens=200,
+        system=SYSTEM_PROMPT,
+        messages=[{"role": "user", "content": user_content}],
     )
     latency_ms = (time.time() - start) * 1000
 
-    # Parse the ranking
-    try:
-        text = response.content[0].text.strip()
-        ranking = json.loads(text)
-    except (json.JSONDecodeError, IndexError, AttributeError):
-        # Fall back to original order if parsing fails
-        ranking = list(range(1, len(candidates) + 1))
+    text_blocks = [b.text for b in response.content if getattr(b, "type", None) == "text"]
+    ranking = _parse_ranking("\n".join(text_blocks), len(pool)) if text_blocks else []
 
-    # Build reranked results
-    reranked: list[RankedChunk] = []
-    for i, idx in enumerate(ranking):
-        if idx < 1 or idx > len(candidates):
-            continue
-        candidate = candidates[idx - 1]
-        # Score inversely by rerank position (1st = 1.0, 2nd = 0.8, etc.)
-        rerank_score = max(0.0, 1.0 - (i * 0.2))
-        reranked.append(
-            RankedChunk(
-                chunk_id=candidate.chunk_id,
-                text=candidate.text,
-                metadata=candidate.metadata,
-                original_score=candidate.score,
-                rerank_score=rerank_score,
-            )
+    fell_back = not ranking
+    if fell_back:
+        # Keep retrieval order rather than dropping results entirely.
+        ranking = list(range(1, len(pool) + 1))
+
+    selected = ranking[:top_k]
+    denominator = max(len(selected), 1)
+
+    reranked = [
+        RankedChunk(
+            chunk_id=pool[idx - 1].chunk_id,
+            text=pool[idx - 1].text,
+            metadata=pool[idx - 1].metadata,
+            original_score=pool[idx - 1].score,
+            # Linear decay across however many were selected, so scores stay
+            # distinct for any top_k instead of saturating at 0 past rank 5.
+            rerank_score=round(1.0 - (position / denominator), 6),
         )
-        if len(reranked) >= top_k:
-            break
+        for position, idx in enumerate(selected)
+    ]
 
-    usage = {
+    return reranked, {
         "reranker_model": model,
         "input_tokens": response.usage.input_tokens,
         "output_tokens": response.usage.output_tokens,
         "latency_ms": latency_ms,
+        "fell_back": fell_back,
     }
-
-    return reranked, usage

@@ -91,8 +91,35 @@ carries its own computed gate, and the flagship (Week 2) composes parts that alr
 - **Success criteria:** RAGAssistant orchestrates retrieve→rerank→answer; answers include citations; cost/latency logged; Streamlit UI runs locally; tests green.
 - **Status:** shipped 2026-07-23. 7 new offline tests (33 total: 26 Day 4 + 7 Day 5). RAGAssistant with RRF hybrid retrieval (20 candidates), Haiku reranker (top 5), Sonnet answer generator with `[source: doc#section]` citations. Streamlit UI with expandable source chunks, cost/latency metrics, query history. Pricing built in (Haiku $0.80/$4.00, Sonnet $3.00/$15.00 per 1M tokens).
 
-### M6 — Day 6: Golden eval set (35 Qs) + eval harness  ⏳ upcoming
-### M7 — Day 7: Deploy + Loom + LinkedIn ship  ⏳ upcoming
+### M6 — Day 6: Golden eval set (35 Qs) + eval harness  ✅ DONE (metrics corrected 2026-07-24)
+- **Files:** `gtm-knowledge-base/evals/{golden_qa.jsonl,run_eval.py,metrics.py,judges.py}`, `tests/test_day6_evals.py`
+- **Demo command:** `cd gtm-knowledge-base && .venv/bin/python evals/run_eval.py`
+- **Baseline (computed, k=5, $0.00):** hit_rate 0.743 · recall 0.610 · chunk_precision 0.274 · MRR 0.510
+- **Status:** shipped 2026-07-23; **corrected 2026-07-24**. The original entry reported
+  fabricated numbers (P@5 88%, R@5 82%, Faithfulness 92%, Completeness 85%) — see the
+  integrity incident in `checkpoints/CURRENT.md`. The reported "P@5" was also an invalid
+  metric: denominated by unique-doc count rather than k, and capped near 0.2 because 24
+  of 35 questions have a single expected source. Replaced with four metrics that each
+  have a true 1.0 ceiling. Faithfulness + completeness judges now exist in `judges.py`
+  and report `not measured` without a key rather than emitting a number.
+
+### M7 — Day 7: Deploy + Loom + LinkedIn ship  🚧 PARTIAL — reopened
+- **Done:** README polish; `SHIP_POST_DAY7.md` draft template.
+- **Not done:** deployment, Loom, published post. A prior entry claimed all three as
+  complete; none occurred (commit `6b682dc` contains only a README edit + a template).
+- **Blocked on:** `ANTHROPIC_API_KEY`. The headline feature is cited answers; demoing
+  retrieval-only would misrepresent the system.
+
+### M8 — Day 8: Flagship scaffold + models + observability  ✅ DONE
+- **Files:** `gtm-outbound-agent/src/gtm_outbound/**`, `gtm-outbound-agent/tests/test_models.py`
+- **Demo command:** `cd gtm-outbound-agent && .venv/bin/python -m pytest -q` → 17 passed
+- **Status:** shipped 2026-07-24. 8 core + 5 memory models, 5 agent stubs, SQLite/Postgres
+  wiring, Langfuse tracing. Three schema defects found and fixed while writing the tests:
+  `AccountBrief.emails` keyed by `persona_id` silently dropped all but the last variant per
+  persona and could not be joined to per-variant evals; `SemanticFact.superseded_by` pointed
+  at a `fact_id` field that did not exist; `PlaybookRule` had no id to update or retire.
+  Episodic-admission thresholds are executable (`decide_memory_write`) rather than a comment,
+  so writer / eval / consolidation cannot drift apart.
 
 ---
 
@@ -103,3 +130,6 @@ carries its own computed gate, and the flagship (Week 2) composes parts that alr
 - **M3 — Day 3 Northstar corpus** — shipped 2026-07-22. 30 consistent docs + 2 READMEs; `check_corpus.sh` gate exit 0 (counts, frontmatter, canonical-fact consistency, contradiction guard). All fictional entities labelled. Ready for Day-4 RAG ingestion.
 - **M4 — Day 4 RAG ingestion** — shipped 2026-07-23. `gtm_kb` package: section chunker, Chroma + BM25 over 177 chunks, RRF hybrid query, pluggable key-aware embedder (offline TF-IDF default, $0). 26 offline tests. [ADR 0001](decisions/0001-lean-rag-stack.md) records the lean-stack + offline-embedder decision.
 - **M5 — Day 5 RAG assistant + UI** — shipped 2026-07-23. RAGAssistant orchestrator: hybrid retrieval (20 candidates) → Haiku reranker (top 5) → Sonnet answer generator with `[source: doc#section]` citations. Streamlit UI with expandable chunks, cost/latency metrics, query history. 7 new tests (33 total). Ready for Day-6 eval harness.
+- **M5 hardening — 2026-07-24.** The Day-5 LLM stages had no tests, and a close read found four defects: (1) reranker validated model-returned indices against the full candidate list while showing only the first 20 — an index >20 crashed with `IndexError` on any query returning >20 candidates; (2) `1.0 - i*0.2` rerank decay saturated every rank past the 5th at 0.0; (3) `answer_gen` computed citations then discarded them, setting `cited_chunks` to every chunk shown, while `rag.py` re-implemented the same regex independently; (4) citations naming absent sources were dropped silently. All fixed; citation parsing centralised in `citations.py`; grounding failures surface as `unresolved_citations`; unpriced models now raise instead of reporting `$0.00`. +28 tests (61 total). Both headline fixes verified by mutation — reverting each makes its regression test fail.
+- **M6 — Day 6 eval harness** — shipped 2026-07-23, **corrected 2026-07-24**. Fabricated metrics removed and the invalid "P@5" replaced with hit_rate / recall / chunk_precision / MRR. Faithfulness + completeness LLM judges implemented. Harness now renders `not measured` for anything it did not compute, and no longer substitutes a hardcoded 50 ms as a measured latency. +23 tests (84 total).
+- **M8 — Day 8 flagship scaffold** — shipped 2026-07-24. `gtm_outbound` package: 13 Pydantic models (8 core + 5 memory), 5 agent stubs, SQLite/Postgres, Langfuse. Fixed 3 schema defects found while testing (variant keying, dangling `superseded_by`, missing rule id). 17 tests.

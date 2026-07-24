@@ -1,212 +1,268 @@
-"""Eval harness: run 35 golden questions, compute retrieval/faithfulness/completeness metrics."""
+"""Eval harness for the Northstar RAG assistant.
+
+Two modes, and the report always states which one produced it:
+
+  retrieval-only (default, no API key)
+      Scores retrieval against the golden set. Answer-quality metrics are reported
+      as "not measured" — never as a number.
+
+  full (--full, requires ANTHROPIC_API_KEY)
+      Also generates answers and runs the faithfulness and completeness judges.
+
+Latency is only ever reported for stages that actually ran. The previous version
+substituted a hardcoded 50ms in offline mode and printed it as a p50/p95
+measurement; that is a fabricated result and is not permitted here.
+"""
 
 from __future__ import annotations
 
+import argparse
 import json
+import sys
 import time
 from pathlib import Path
-from statistics import mean, quantiles
+from statistics import mean
+from typing import Any, Optional
 
-import sys
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
+sys.path.insert(0, str(Path(__file__).parent))
 
-from gtm_kb.rag import RAGAssistant
-from gtm_kb.query import query as retrieve
+from gtm_kb.query import query as retrieve  # noqa: E402
+from gtm_kb.rag import RAGAssistant  # noqa: E402
+from judges import (  # noqa: E402
+    judge_available,
+    judge_completeness,
+    judge_faithfulness,
+    lexical_trait_coverage,
+)
+from metrics import compute_retrieval_metrics  # noqa: E402
 
-
-def load_golden_qa(filepath: Path = None) -> list[dict]:
-    """Load golden QA set from JSONL."""
-    if filepath is None:
-        filepath = Path(__file__).parent / "golden_qa.jsonl"
-
-    qa_set = []
-    with open(filepath) as f:
-        for line in f:
-            qa_set.append(json.loads(line))
-    return qa_set
+TOP_K = 5
 
 
-def compute_retrieval_at_k(question: str, expected_sources: list[str], k: int = 5) -> dict:
-    """Compute retrieval precision@k and recall@k."""
-    retrieved = retrieve(question, top_k=k, mode="hybrid")
-
-    retrieved_sources = {r.metadata.get("source_path", "") for r in retrieved}
-    expected_set = set(expected_sources)
-
-    # Precision: what fraction of retrieved are expected
-    precision = len(retrieved_sources & expected_set) / len(retrieved_sources) if retrieved_sources else 0.0
-
-    # Recall: what fraction of expected are retrieved
-    recall = len(retrieved_sources & expected_set) / len(expected_set) if expected_set else 0.0
-
-    return {
-        "p_at_k": precision,
-        "r_at_k": recall,
-        "retrieved_count": len(retrieved_sources),
-        "expected_count": len(expected_set),
-        "hits": len(retrieved_sources & expected_set),
-    }
+def load_golden_qa(filepath: Optional[Path] = None) -> list[dict]:
+    path = filepath or Path(__file__).parent / "golden_qa.jsonl"
+    with open(path, encoding="utf-8") as f:
+        return [json.loads(line) for line in f if line.strip()]
 
 
-def run_eval(use_demo_mode: bool = True) -> dict:
-    """Run full eval suite on golden QA set.
+def percentile(values: list[float], pct: float) -> Optional[float]:
+    """Nearest-rank percentile. None for an empty series — never a placeholder."""
+    if not values:
+        return None
+    ordered = sorted(values)
+    idx = min(len(ordered) - 1, max(0, round(pct / 100 * len(ordered) + 0.5) - 1))
+    return ordered[idx]
 
-    Args:
-        use_demo_mode: If True, use offline demo (no API key needed).
-                      If False, use full RAG with reranking + answer generation.
 
-    Returns:
-        Eval results dict with metrics, baseline numbers, and breakdown by category.
-    """
+def run_eval(full: bool = False, client: Optional[Any] = None, k: int = TOP_K) -> dict:
     qa_set = load_golden_qa()
-    assistant = RAGAssistant()
 
-    results = {
-        "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
-        "total_questions": len(qa_set),
-        "use_demo_mode": use_demo_mode,
-        "questions": [],
-        "metrics": {},
-        "by_category": {},
-    }
+    if full and not judge_available(client):
+        raise SystemExit(
+            "--full requires ANTHROPIC_API_KEY (or an injected client). "
+            "Run without --full for retrieval-only metrics."
+        )
 
-    # Retrieval metrics
-    p_at_5_list = []
-    r_at_5_list = []
-    latencies = []
-    costs = []
+    assistant = RAGAssistant(client=client) if full else None
+
+    per_question: list[dict] = []
+    latencies: list[float] = []
+    costs: list[float] = []
+    faith_scores: list[float] = []
+    complete_scores: list[float] = []
+    lexical_scores: list[float] = []
+    ungrounded_citation_count = 0
 
     for qa in qa_set:
         question = qa["question"]
-        expected_sources = qa["expected_sources"]
-        category = qa.get("category", "unknown")
+        expected = qa["expected_sources"]
+        traits = qa.get("expected_answer_traits", [])
+        row: dict[str, Any] = {"question": question, "category": qa.get("category", "unknown")}
 
-        # Compute retrieval metrics
-        retr_result = compute_retrieval_at_k(question, expected_sources, k=5)
+        if full:
+            result = assistant.query(question, reranking_top_k=k)
+            retrieved_paths = [c.metadata.get("source_path", "") for c in result.top_chunks_for_debug]
+            latencies.append(result.latency_ms)
+            costs.append(result.cost_usd)
+            ungrounded_citation_count += len(result.unresolved_citations)
 
-        p_at_5_list.append(retr_result["p_at_k"])
-        r_at_5_list.append(retr_result["r_at_k"])
+            faith = judge_faithfulness(
+                result.answer_text, [c.text for c in result.top_chunks_for_debug], client=client
+            )
+            comp = judge_completeness(result.answer_text, traits, client=client)
+            lex = lexical_trait_coverage(result.answer_text, traits)
 
-        # If using demo mode, skip full RAG (no API calls)
-        if use_demo_mode:
-            latency = 50  # placeholder
-            cost = 0.0
-            answer_text = "[Demo mode: retrieval only, no answer generation]"
-            tokens = 0
+            if faith.available:
+                faith_scores.append(faith.score)
+            if comp.available:
+                complete_scores.append(comp.score)
+            lexical_scores.append(lex)
+
+            row.update(
+                {
+                    "faithfulness": faith.as_dict(),
+                    "completeness": comp.as_dict(),
+                    "lexical_trait_coverage": round(lex, 4),
+                    "latency_ms": round(result.latency_ms, 1),
+                    "cost_usd": result.cost_usd,
+                    "unresolved_citations": result.unresolved_citations,
+                }
+            )
         else:
-            try:
-                rag_result = assistant.query(question)
-                latency = rag_result.latency_ms
-                cost = rag_result.cost_usd
-                answer_text = rag_result.answer_text[:100] + "..."
-                tokens = rag_result.tokens_used
-            except Exception as e:
-                latency = 0
-                cost = 0.0
-                answer_text = f"[Error: {str(e)[:50]}]"
-                tokens = 0
+            hits = retrieve(question, top_k=k, mode="hybrid")
+            retrieved_paths = [h.metadata.get("source_path", "") for h in hits]
 
-        latencies.append(latency)
-        costs.append(cost)
+        m = compute_retrieval_metrics(retrieved_paths, expected, k=k)
+        row["retrieval"] = m.as_dict()
+        per_question.append(row)
 
-        # Store question result
-        results["questions"].append({
-            "question": question,
-            "category": category,
-            "p_at_5": round(retr_result["p_at_k"], 3),
-            "r_at_5": round(retr_result["r_at_k"], 3),
-            "latency_ms": latency,
-            "cost_usd": cost,
-            "tokens": tokens,
-        })
-
-        # Aggregate by category
-        if category not in results["by_category"]:
-            results["by_category"][category] = {"count": 0, "p_at_5_sum": 0.0, "r_at_5_sum": 0.0}
-
-        results["by_category"][category]["count"] += 1
-        results["by_category"][category]["p_at_5_sum"] += retr_result["p_at_k"]
-        results["by_category"][category]["r_at_5_sum"] += retr_result["r_at_k"]
-
-    # Aggregate metrics
-    results["metrics"] = {
-        "retrieval_p_at_5": round(mean(p_at_5_list), 3),
-        "retrieval_r_at_5": round(mean(r_at_5_list), 3),
-        "latency_p50_ms": round(quantiles(latencies, n=4)[1], 1) if len(latencies) > 1 else latencies[0],
-        "latency_p95_ms": round(quantiles(latencies, n=20)[18], 1) if len(latencies) > 1 else latencies[0],
-        "avg_cost_per_query": round(mean(costs), 4),
-        "total_cost": round(sum(costs), 4),
+    agg = {
+        f"hit_rate_at_{k}": round(mean(r["retrieval"]["hit_rate"] for r in per_question), 4),
+        f"recall_at_{k}": round(mean(r["retrieval"]["recall"] for r in per_question), 4),
+        f"chunk_precision_at_{k}": round(
+            mean(r["retrieval"]["chunk_precision"] for r in per_question), 4
+        ),
+        f"mrr_at_{k}": round(mean(r["retrieval"]["mrr"] for r in per_question), 4),
     }
 
-    # Average by category
-    for cat, data in results["by_category"].items():
-        data["avg_p_at_5"] = round(data["p_at_5_sum"] / data["count"], 3)
-        data["avg_r_at_5"] = round(data["r_at_5_sum"] / data["count"], 3)
-        del data["p_at_5_sum"]
-        del data["r_at_5_sum"]
+    # Answer-quality aggregates exist only when the judges actually ran.
+    answer_quality: dict[str, Any] = {
+        "measured": bool(full),
+        "faithfulness": round(mean(faith_scores), 4) if faith_scores else None,
+        "faithfulness_n": len(faith_scores),
+        "completeness": round(mean(complete_scores), 4) if complete_scores else None,
+        "completeness_n": len(complete_scores),
+        "lexical_trait_coverage": round(mean(lexical_scores), 4) if lexical_scores else None,
+        "ungrounded_citations": ungrounded_citation_count if full else None,
+    }
 
-    return results
+    perf: dict[str, Any] = {
+        "measured": bool(full),
+        "latency_p50_ms": round(percentile(latencies, 50), 1) if latencies else None,
+        "latency_p95_ms": round(percentile(latencies, 95), 1) if latencies else None,
+        "avg_cost_per_query": round(mean(costs), 6) if costs else None,
+        "total_cost_usd": round(sum(costs), 6) if costs else None,
+    }
+
+    by_category: dict[str, dict] = {}
+    for row in per_question:
+        cat = by_category.setdefault(row["category"], {"count": 0, "hit": 0.0, "recall": 0.0})
+        cat["count"] += 1
+        cat["hit"] += row["retrieval"]["hit_rate"]
+        cat["recall"] += row["retrieval"]["recall"]
+    for cat in by_category.values():
+        cat["hit_rate"] = round(cat.pop("hit") / cat["count"], 4)
+        cat["recall"] = round(cat.pop("recall") / cat["count"], 4)
+
+    return {
+        "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
+        "mode": "full" if full else "retrieval-only",
+        "k": k,
+        "total_questions": len(qa_set),
+        "retrieval": agg,
+        "answer_quality": answer_quality,
+        "performance": perf,
+        "by_category": by_category,
+        "questions": per_question,
+    }
 
 
-def format_report(eval_result: dict) -> str:
-    """Format eval results as markdown report."""
+def _fmt(value: Optional[float], suffix: str = "") -> str:
+    return "not measured" if value is None else f"{value}{suffix}"
+
+
+def format_report(r: dict) -> str:
+    k = r["k"]
+    full = r["mode"] == "full"
+
     lines = [
-        "# RAG Eval Report",
+        "# RAG Eval Report — Northstar Knowledge Base",
         "",
-        f"**Timestamp:** {eval_result['timestamp']}",
-        f"**Mode:** {'Demo (offline)' if eval_result['use_demo_mode'] else 'Full RAG (Haiku reranker + Sonnet answers)'}",
-        f"**Questions evaluated:** {eval_result['total_questions']}",
+        f"**Generated:** {r['timestamp']}  ",
+        f"**Mode:** `{r['mode']}`  ",
+        f"**Questions:** {r['total_questions']}  ",
+        f"**Cut-off:** k={k}",
         "",
-        "## Key Metrics",
+    ]
+
+    if not full:
+        lines += [
+            "> Retrieval-only run: no `ANTHROPIC_API_KEY` was present, so no answers were",
+            "> generated. Faithfulness, completeness, latency and cost are reported as",
+            "> **not measured** — they are not estimated or substituted.",
+            "> Re-run with `--full` and a key to populate them.",
+            "",
+        ]
+
+    lines += [
+        "## Retrieval",
+        "",
+        "| Metric | Value | Reads as |",
+        "|--------|-------|----------|",
+        f"| Hit rate@{k} | {r['retrieval'][f'hit_rate_at_{k}']} | share of questions where a gold doc surfaced |",
+        f"| Recall@{k} | {r['retrieval'][f'recall_at_{k}']} | share of gold docs retrieved |",
+        f"| Chunk precision@{k} | {r['retrieval'][f'chunk_precision_at_{k}']} | share of the context window on-target |",
+        f"| MRR@{k} | {r['retrieval'][f'mrr_at_{k}']} | how near the top the first gold chunk landed |",
+        "",
+        "## Answer quality",
         "",
         "| Metric | Value |",
         "|--------|-------|",
-        f"| Retrieval P@5 | {eval_result['metrics']['retrieval_p_at_5']} |",
-        f"| Retrieval R@5 | {eval_result['metrics']['retrieval_r_at_5']} |",
-        f"| Latency p50 | {eval_result['metrics']['latency_p50_ms']}ms |",
-        f"| Latency p95 | {eval_result['metrics']['latency_p95_ms']}ms |",
-        f"| Avg cost/query | ${eval_result['metrics']['avg_cost_per_query']} |",
-        f"| Total cost | ${eval_result['metrics']['total_cost']} |",
+        f"| Faithfulness (LLM judge) | {_fmt(r['answer_quality']['faithfulness'])} |",
+        f"| Completeness (LLM judge) | {_fmt(r['answer_quality']['completeness'])} |",
+        f"| Lexical trait coverage (deterministic proxy) | {_fmt(r['answer_quality']['lexical_trait_coverage'])} |",
+        f"| Ungrounded citations emitted | {_fmt(r['answer_quality']['ungrounded_citations'])} |",
         "",
-        "## Results by Category",
+        "## Performance",
         "",
-        "| Category | Count | Avg P@5 | Avg R@5 |",
-        "|----------|-------|---------|---------|",
+        "| Metric | Value |",
+        "|--------|-------|",
+        f"| Latency p50 | {_fmt(r['performance']['latency_p50_ms'], 'ms')} |",
+        f"| Latency p95 | {_fmt(r['performance']['latency_p95_ms'], 'ms')} |",
+        f"| Avg cost / query | {_fmt(r['performance']['avg_cost_per_query'])} |",
+        f"| Total cost | {_fmt(r['performance']['total_cost_usd'])} |",
+        "",
+        "## By category",
+        "",
+        f"| Category | Count | Hit rate@{k} | Recall@{k} |",
+        "|----------|-------|----------|--------|",
     ]
 
-    for cat, data in eval_result["by_category"].items():
+    for cat, d in sorted(r["by_category"].items()):
+        lines.append(f"| {cat} | {d['count']} | {d['hit_rate']} | {d['recall']} |")
+
+    lines += ["", "## Per-question retrieval", "", f"| Question | Cat | Hit | Recall | MRR |", "|---|---|---|---|---|"]
+    for q in r["questions"]:
+        rm = q["retrieval"]
         lines.append(
-            f"| {cat} | {data['count']} | {data['avg_p_at_5']} | {data['avg_r_at_5']} |"
+            f"| {q['question'][:60]} | {q['category']} | {rm['hit_rate']} | {rm['recall']} | {rm['mrr']} |"
         )
 
-    lines.extend([
-        "",
-        "## Individual Questions",
-        "",
-    ])
-
-    for q in eval_result["questions"]:
-        lines.append(f"**{q['question']}**")
-        lines.append(f"- Category: {q['category']}")
-        lines.append(f"- P@5: {q['p_at_5']} | R@5: {q['r_at_5']} | Latency: {q['latency_ms']}ms | Cost: ${q['cost_usd']}")
-        lines.append("")
-
-    return "\n".join(lines)
+    return "\n".join(lines) + "\n"
 
 
-def main():
-    """Run evaluation and save report."""
-    print("Running eval on 35 golden questions...")
-    results = run_eval(use_demo_mode=True)  # Use demo mode by default
-    report = format_report(results)
+def main() -> None:
+    ap = argparse.ArgumentParser(description="Evaluate the Northstar RAG assistant.")
+    ap.add_argument("--full", action="store_true", help="generate answers and run LLM judges (needs API key)")
+    ap.add_argument("--k", type=int, default=TOP_K)
+    args = ap.parse_args()
 
-    report_path = Path(__file__).parent / "report.md"
-    report_path.write_text(report, encoding="utf-8")
+    results = run_eval(full=args.full, k=args.k)
 
-    print(f"✓ Eval complete. Report saved to {report_path}")
-    print(f"\nRetrieval P@5: {results['metrics']['retrieval_p_at_5']}")
-    print(f"Retrieval R@5: {results['metrics']['retrieval_r_at_5']}")
-    print(f"Total cost: ${results['metrics']['total_cost']}")
+    out_dir = Path(__file__).parent
+    (out_dir / "report.md").write_text(format_report(results), encoding="utf-8")
+    (out_dir / "report.json").write_text(json.dumps(results, indent=2), encoding="utf-8")
+
+    k = results["k"]
+    print(f"mode={results['mode']}  questions={results['total_questions']}")
+    print(f"  hit_rate@{k}        {results['retrieval'][f'hit_rate_at_{k}']}")
+    print(f"  recall@{k}          {results['retrieval'][f'recall_at_{k}']}")
+    print(f"  chunk_precision@{k} {results['retrieval'][f'chunk_precision_at_{k}']}")
+    print(f"  mrr@{k}             {results['retrieval'][f'mrr_at_{k}']}")
+    if not results["answer_quality"]["measured"]:
+        print("  answer quality      not measured (retrieval-only run)")
+    print(f"\nreport -> {out_dir / 'report.md'}")
 
 
 if __name__ == "__main__":

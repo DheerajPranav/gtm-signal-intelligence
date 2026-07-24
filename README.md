@@ -20,12 +20,24 @@ A four-week (28-day) applied-AI engineering sprint building a portfolio of GTM (
 | 2 | `extract_lead()` — typed `Lead` with per-field confidence + evidence | `pytest -q` → 14 pass | ✅ |
 | 3 | Northstar knowledge corpus — 30 consistent docs for RAG | `check_corpus.sh` → exit 0 | ✅ |
 | 4 | RAG ingestion — section chunking, Chroma + BM25, hybrid query | `gtm_kb.ingest` + `pytest` → 26 pass | ✅ |
-| 5 | RAG assistant — hybrid retrieval + rerank → cited answers + Streamlit UI + cost tracking | `streamlit run app.py` + `pytest` → 33 pass | ✅ |
-| 6 | Golden eval set (35 Qs) + eval harness — retrieval, faithfulness, completeness, cost | `python -m gtm_kb.evals.run` → report.md + baseline | ✅ |
-| 7 | Deploy + README polish + Loom + LinkedIn ship | Live URL + docs + Loom link | ✅ |
-| 8–28 | Account research agent, outbound generation, and more (Weeks 2–4) | _tbd_ | ⏳ |
+| 5 | RAG assistant — hybrid retrieval + rerank → cited answers + Streamlit UI + cost tracking | `pytest -q` → 61 pass | ✅ |
+| 6 | Golden eval set (35 Qs) + eval harness — retrieval metrics + LLM judges | `python evals/run_eval.py` → report.md | ✅ |
+| 7 | Deploy + Loom + LinkedIn ship | Live URL + Loom link | 🚧 blocked on API key — README + post *draft* only |
+| 8 | Flagship scaffold — multi-agent models + observability + memory schema | `pytest -q` → 17 pass | ✅ |
+| 9–28 | Research/scoring/persona/writing/critique agents, then the v2 learning loop | _tbd_ | ⏳ |
 
-**API spend to date:** Logged per query; Week-1 gates verified with deterministic mocks (offline embeddings, mock LLM calls).
+**API spend to date:** `$0.00`. Every gate above is verified offline — deterministic
+embeddings and injected fake LLM clients. No live model output is reported anywhere.
+
+### Retrieval baseline (35 golden questions, k=5)
+
+| Hit rate@5 | Recall@5 | Chunk precision@5 | MRR@5 |
+|---|---|---|---|
+| 0.743 | 0.610 | 0.274 | 0.510 |
+
+Faithfulness and completeness are LLM-judge metrics and are reported as **not measured**
+until an API key is present — see [the correction note](gtm-knowledge-base/PROGRESS.md)
+on why this matters more than the numbers themselves.
 
 ## Layout
 
@@ -56,18 +68,20 @@ python -m venv .venv && .venv/bin/pip install -e ".[dev]"
 cd ../gtm-knowledge-base
 bash scripts/check_corpus.sh           # -> CORPUS OK (exit 0)
 
-# Days 4–5 — RAG ingestion + retrieval + UI (offline, no API key needed)
+# Days 4–6 — RAG ingestion, retrieval, cited answers, evals (offline, no API key)
 python -m venv .venv && .venv/bin/pip install -e ".[dev]"
 .venv/bin/python -m gtm_kb.ingest      # -> 30 docs, 177 chunks (Chroma + BM25)
-.venv/bin/python -m pytest -q          # -> 33 passed
-streamlit run app.py                   # -> UI with demo mode (no API key needed)
+.venv/bin/python -m pytest -q          # -> 84 passed
+.venv/bin/python evals/run_eval.py     # -> evals/report.md (retrieval metrics)
+streamlit run app.py                   # -> UI, demo mode needs no key
 
-# Day 6 — eval harness (offline)
-.venv/bin/python -m gtm_kb.evals.run   # -> evals/report.md with baseline metrics
+# Day 6 full run — adds faithfulness + completeness judges (needs a key)
+.venv/bin/python evals/run_eval.py --full
 
-# Day 7 — deployed + documented
-# Live URL: [check commit for deployment link]
-# Loom: [check README in gtm-knowledge-base/]
+# Day 8 — flagship scaffold
+cd ../../gtm-outbound-agent
+python -m venv .venv && .venv/bin/pip install -e ".[dev]"
+.venv/bin/python -m pytest -q          # -> 17 passed
 ```
 
 ## Highlights so far
