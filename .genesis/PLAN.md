@@ -110,9 +110,18 @@ carries its own computed gate, and the flagship (Week 2) composes parts that alr
 - **Blocked on:** `ANTHROPIC_API_KEY`. The headline feature is cited answers; demoing
   retrieval-only would misrepresent the system.
 
-### M8 — Day 8: Flagship scaffold + models + observability  ✅ DONE
-- **Files:** `gtm-outbound-agent/src/gtm_outbound/**`, `gtm-outbound-agent/tests/test_models.py`
-- **Demo command:** `cd gtm-outbound-agent && .venv/bin/python -m pytest -q` → 17 passed
+### M8 — Day 8: Flagship scaffold + models + observability  ✅ DONE (blocked items noted)
+- **Files:** `gtm-outbound-agent/src/gtm_outbound/**`, `gtm-outbound-agent/tests/**`, `docs/architecture.md`
+- **Demo command:** `cd gtm-outbound-agent && .venv/bin/python -m pytest -q` → 28 passed
+- **DoD:** scaffold ✅ · architecture doc ✅ · models ✅ · **migrations ✅ (3 tables)** ·
+  Langfuse test event ⛔ needs `LANGFUSE_*` keys · push ⛔ no remote configured
+- **Migration defect (fixed 2026-07-24):** `init_db()` called `create_all()` while every
+  model was a plain `BaseModel`, so nothing was ever registered — it ran cleanly and
+  created **zero tables**. Added `tables.py` (SQLModel rows + domain converters), made the
+  registering import explicit, and made `init_db()` raise on empty metadata instead of
+  succeeding vacuously. Regression test runs in a subprocess importing only `db`, because
+  the first version asserted it in-process and passed with the bug reintroduced — the test
+  module's own import of `tables` was masking it.
 - **Status:** shipped 2026-07-24. 8 core + 5 memory models, 5 agent stubs, SQLite/Postgres
   wiring, Langfuse tracing. Three schema defects found and fixed while writing the tests:
   `AccountBrief.emails` keyed by `persona_id` silently dropped all but the last variant per
