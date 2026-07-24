@@ -81,6 +81,47 @@ python -m venv .venv && .venv/bin/pip install -e ".[dev]"
 .venv/bin/python -m pytest -q     # -> 28 passed
 ```
 
+## Day 9 — Research Agent
+
+`enrich(domain, provider)` runs a bounded tool-use loop (`web_search`, `fetch_page`,
+`news_search`, max 8 calls) and returns a **sourced** `CompanyProfile`.
+
+- **Provenance is structural.** Every value is a `Sourced[T]` carrying `value`,
+  `source_url`, `confidence`. The tool schema requires `source_url` per field, so
+  provenance is captured at extraction time rather than reconstructed afterwards.
+- **Gaps beat guesses.** No field is required. A field the agent cannot source is
+  omitted, and `coverage()` reports how much was found — so the eval can tell "wrong"
+  apart from "not found".
+- **Injection-aware.** Every tool result is fenced in `<<<UNTRUSTED_WEB_CONTENT …>>>`
+  markers with the source URL attached, and the system prompt states that fenced content
+  is data. Web pages are attacker-controllable; a page telling the agent to rate its own
+  company favourably is a realistic attack, not a hypothetical.
+- **Degrades, doesn't abort.** Tool failures return as text so the agent can adapt;
+  budget exhaustion forces the final answer instead of truncating the run.
+
+### Eval
+
+```bash
+.venv/bin/python evals/run_enrichment_eval.py --offline   # gold-set readiness, no network
+.venv/bin/python evals/run_enrichment_eval.py             # live run
+```
+
+| Metric | Status | Depends on |
+|---|---|---|
+| URL grounding | computable now | nothing — deterministic |
+| Field coverage | computable now | nothing |
+| Field accuracy | **not measured** | hand-verified ground truth |
+
+**URL grounding** checks that every cited `source_url` was actually retrieved during the
+run. A citation to a URL the agent never fetched is fabricated provenance — the worst
+failure mode here, because it looks sourced. This needs no LLM judge.
+
+**Field accuracy is deliberately unmeasured.** `evals/enrichment_gold.jsonl` ships with
+10 real companies and *empty* ground truth. Filling in headcount and funding stage from
+memory would produce an accuracy figure measured against guesses. The harness excludes
+`verified: false` rows and reports `not measured` until a human populates them — see
+[`evals/README.md`](evals/README.md).
+
 ## Status
 
 ✅ **Complete (Day 8):**
@@ -90,8 +131,11 @@ python -m venv .venv && .venv/bin/pip install -e ".[dev]"
 - DB setup (SQLite + Postgres support)
 - Architecture documentation
 
+✅ **Complete (Day 9):** research agent, sourced profiles, injection fencing,
+enrichment eval harness. 64 tests. Open: needs `ANTHROPIC_API_KEY` + `TAVILY_API_KEY`
+for a live run, and a human to verify the gold set before accuracy can be reported.
+
 ⏳ **Upcoming:**
-- Day 9: Research agent (web search enrichment)
 - Day 10: Scoring agent (ICP fit)
 - Day 11: Persona agent (buyer discovery)
 - Day 12: Writing agent (email drafting, v2-aware)

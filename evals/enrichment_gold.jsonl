@@ -1,0 +1,10 @@
+{"domain": "linear.app", "name": "Linear", "verified": false, "expected": {"industry": null, "sub_industry": null, "size_band": null, "funding_stage": null}, "notes": "DoD reference company — enrich('linear.app') is the Day 9 smoke test."}
+{"domain": "vercel.com", "name": "Vercel", "verified": false, "expected": {"industry": null, "sub_industry": null, "size_band": null, "funding_stage": null}, "notes": ""}
+{"domain": "supabase.com", "name": "Supabase", "verified": false, "expected": {"industry": null, "sub_industry": null, "size_band": null, "funding_stage": null}, "notes": ""}
+{"domain": "ramp.com", "name": "Ramp", "verified": false, "expected": {"industry": null, "sub_industry": null, "size_band": null, "funding_stage": null}, "notes": "Fintech — closer to the Northstar ICP."}
+{"domain": "retool.com", "name": "Retool", "verified": false, "expected": {"industry": null, "sub_industry": null, "size_band": null, "funding_stage": null}, "notes": ""}
+{"domain": "posthog.com", "name": "PostHog", "verified": false, "expected": {"industry": null, "sub_industry": null, "size_band": null, "funding_stage": null}, "notes": "Analytics — adjacent to Northstar's category."}
+{"domain": "clari.com", "name": "Clari", "verified": false, "expected": {"industry": null, "sub_industry": null, "size_band": null, "funding_stage": null}, "notes": "A Northstar competitor in the fictional corpus."}
+{"domain": "gong.io", "name": "Gong", "verified": false, "expected": {"industry": null, "sub_industry": null, "size_band": null, "funding_stage": null}, "notes": "A Northstar competitor in the fictional corpus."}
+{"domain": "notion.so", "name": "Notion", "verified": false, "expected": {"industry": null, "sub_industry": null, "size_band": null, "funding_stage": null}, "notes": "Day 1 warmup CLI used this company."}
+{"domain": "airtable.com", "name": "Airtable", "verified": false, "expected": {"industry": null, "sub_industry": null, "size_band": null, "funding_stage": null}, "notes": ""}

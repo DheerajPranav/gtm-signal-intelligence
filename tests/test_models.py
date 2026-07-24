@@ -22,6 +22,7 @@ from gtm_outbound.models import (
     SemanticFact,
     FactType,
     Seniority,
+    Sourced,
     TargetCompany,
     VariantAngle,
     decide_memory_write,
@@ -30,17 +31,21 @@ from gtm_outbound.models import (
 NOW = datetime(2026, 7, 24, 12, 0, 0)
 
 
+def _s(value: str, url: str = "https://acme.com/about", conf: float = 0.9) -> Sourced[str]:
+    return Sourced[str](value=value, source_url=url, confidence=conf)
+
+
 def _profile() -> CompanyProfile:
     return CompanyProfile(
         target=TargetCompany(domain="acme.com", name="Acme"),
-        industry="fintech",
-        sub_industry="payments",
-        size_band="200-500",
-        funding_stage="Series C",
-        tech_stack=["Salesforce", "Snowflake"],
-        recent_news=["raised $40M"],
-        key_people=["Jane Doe"],
-        buying_signals=["hired VP RevOps"],
+        industry=_s("fintech"),
+        sub_industry=_s("payments"),
+        size_band=_s("200-500"),
+        funding_stage=_s("Series C"),
+        tech_stack=[_s("Salesforce"), _s("Snowflake")],
+        recent_news=[_s("raised $40M")],
+        key_people=[_s("Jane Doe")],
+        buying_signals=[_s("hired VP RevOps")],
         last_updated=NOW,
     )
 

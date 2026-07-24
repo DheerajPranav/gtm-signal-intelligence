@@ -4,9 +4,11 @@ from __future__ import annotations
 
 from datetime import datetime
 from enum import Enum
-from typing import Optional
+from typing import ClassVar, Generic, Optional, TypeVar
 
 from pydantic import BaseModel, Field, ConfigDict
+
+T = TypeVar("T")
 
 
 # ============================================================================
@@ -66,19 +68,71 @@ class TargetCompany(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
 
+class Sourced(BaseModel, Generic[T]):
+    """A value with its provenance.
+
+    The Day 9 DoD requires every enriched field to carry a `source_url`. Bolting
+    provenance on afterwards does not work — by then the model has already merged
+    facts from several pages and the trail is gone. So the research tool schema
+    demands `value` + `source_url` together, per field, at extraction time.
+
+    `source_url` is the URL the agent actually retrieved; a field it could not
+    source must be omitted rather than guessed.
+    """
+    value: T
+    source_url: str = Field(description="URL this value was read from")
+    confidence: float = Field(ge=0, le=1)
+    model_config = ConfigDict(extra="forbid")
+
+
 class CompanyProfile(BaseModel):
-    """Enriched company data from research agent."""
+    """Enriched company data from the research agent.
+
+    Optional fields are genuinely optional: research that cannot source a field
+    leaves it `None`. An unsourceable field is a known gap, and a known gap is
+    more useful downstream than a confident guess.
+    """
     target: TargetCompany
-    industry: str
-    sub_industry: str
-    size_band: str  # e.g., "100-500", "500-1000"
-    funding_stage: str  # e.g., "Series B", "Series C"
-    tech_stack: list[str]
-    recent_news: list[str]
-    key_people: list[str]
-    buying_signals: list[str]
+    industry: Optional[Sourced[str]] = None
+    sub_industry: Optional[Sourced[str]] = None
+    size_band: Optional[Sourced[str]] = None  # e.g., "100-500"
+    funding_stage: Optional[Sourced[str]] = None  # e.g., "Series C"
+    tech_stack: list[Sourced[str]] = Field(default_factory=list)
+    recent_news: list[Sourced[str]] = Field(default_factory=list)
+    key_people: list[Sourced[str]] = Field(default_factory=list)
+    buying_signals: list[Sourced[str]] = Field(default_factory=list)
     last_updated: datetime
     model_config = ConfigDict(extra="forbid")
+
+    SCALAR_FIELDS: ClassVar[tuple[str, ...]] = (
+        "industry", "sub_industry", "size_band", "funding_stage",
+    )
+    LIST_FIELDS: ClassVar[tuple[str, ...]] = (
+        "tech_stack", "recent_news", "key_people", "buying_signals",
+    )
+
+    def sourced_values(self) -> list[Sourced]:
+        """Every sourced value on the profile, scalar and list alike."""
+        out: list[Sourced] = []
+        for name in self.SCALAR_FIELDS:
+            got = getattr(self, name)
+            if got is not None:
+                out.append(got)
+        for name in self.LIST_FIELDS:
+            out.extend(getattr(self, name))
+        return out
+
+    def coverage(self) -> float:
+        """Fraction of the four scalar fields that were successfully sourced.
+
+        Reported instead of assuming a full profile: partial enrichment is the
+        normal case, and the eval needs to distinguish "wrong" from "absent".
+        """
+        filled = sum(1 for n in self.SCALAR_FIELDS if getattr(self, n) is not None)
+        return filled / len(self.SCALAR_FIELDS)
+
+    def unsourced_fields(self) -> list[str]:
+        return [n for n in self.SCALAR_FIELDS if getattr(self, n) is None]
 
 
 class FitScore(BaseModel):
