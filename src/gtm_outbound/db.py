@@ -1,46 +1,57 @@
 """Database setup: SQLite (dev) + Postgres (prod).
 
-For v2 memory:
-- Semantic memory: structured account facts (Postgres)
-- Episodic memory: vector embeddings (Chroma)
-- Procedural memory: playbook rules (Postgres)
+v2 memory storage splits by access pattern:
+  - semantic + procedural memory -> SQL (point lookups, aggregation, supersession)
+  - episodic embeddings          -> Chroma (similarity search)
+  - episodic *metadata*          -> SQL, so consolidation can GROUP BY segment
 """
 
+from __future__ import annotations
+
 import os
-from sqlmodel import SQLModel, create_engine, Session
+from typing import Optional
+
 from sqlalchemy.pool import StaticPool
+from sqlmodel import Session, SQLModel, create_engine
+
+DEFAULT_SQLITE_URL = "sqlite:///gtm_outbound.db"
 
 
-def get_engine():
-    """Get database engine (SQLite for dev, Postgres for prod)."""
-    db_url = os.getenv("DATABASE_URL")
+def get_engine(url: Optional[str] = None, echo: Optional[bool] = None):
+    """Engine for the configured database. Postgres when DATABASE_URL is set."""
+    resolved = url or os.getenv("DATABASE_URL") or DEFAULT_SQLITE_URL
+    verbose = echo if echo is not None else os.getenv("SQL_DEBUG", "false").lower() == "true"
 
-    if db_url:
-        # Production: Postgres
-        engine = create_engine(
-            db_url,
-            echo=os.getenv("SQL_DEBUG", "false").lower() == "true",
-        )
-    else:
-        # Development: SQLite
-        engine = create_engine(
-            "sqlite:///gtm_outbound.db",
+    if resolved.startswith("sqlite"):
+        return create_engine(
+            resolved,
             connect_args={"check_same_thread": False},
             poolclass=StaticPool,
-            echo=os.getenv("SQL_DEBUG", "false").lower() == "true",
+            echo=verbose,
         )
+    return create_engine(resolved, echo=verbose)
 
-    return engine
 
+def init_db(url: Optional[str] = None, engine=None):
+    """Create every table and verify at least one exists.
 
-def init_db():
-    """Create tables from SQLModel definitions."""
-    engine = get_engine()
+    The import below is load-bearing: SQLModel only registers a table on
+    `SQLModel.metadata` when its module is imported. Without it `create_all()`
+    succeeds against an empty metadata and creates nothing — which is exactly
+    how this silently shipped creating zero tables.
+    """
+    from . import tables  # noqa: F401  — registers tables on SQLModel.metadata
+
+    engine = engine or get_engine(url)
     SQLModel.metadata.create_all(engine)
+
+    if not SQLModel.metadata.tables:
+        raise RuntimeError(
+            "init_db() created no tables — SQLModel table classes were never "
+            "registered. Check that gtm_outbound.tables is importable."
+        )
     return engine
 
 
-def get_session():
-    """Get a database session."""
-    engine = get_engine()
-    return Session(engine)
+def get_session(engine=None) -> Session:
+    return Session(engine or get_engine())

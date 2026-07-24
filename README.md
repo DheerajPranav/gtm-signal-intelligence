@@ -66,13 +66,20 @@ At write-time, a **retrieval router** queries all three layers and stuffs the co
 ## Day 8 Checklist
 
 - [x] Repo scaffolded
-- [x] Architecture diagram in README
-- [x] Pydantic models (v1 core + v2 memory) — 8 core models + 5 memory models
+- [x] Architecture diagram — [`docs/architecture.md`](docs/architecture.md)
+- [x] Pydantic models (v1 core + v2 memory) — 8 core + 5 memory
 - [x] SQLite + Postgres support wired
+- [x] **SQLite migrations run** — 3 tables, verified in a subprocess that imports only `db`
 - [x] Langfuse observability wiring
 - [x] Agent stubs (5 agents with signatures)
-- [ ] Test imports work
-- [ ] Git commit + push
+- [x] 28 tests pass
+- [ ] Langfuse dashboard shows a test event — **blocked**, needs `LANGFUSE_*` keys
+- [ ] Pushed — no remote configured yet
+
+```bash
+python -m venv .venv && .venv/bin/pip install -e ".[dev]"
+.venv/bin/python -m pytest -q     # -> 28 passed
+```
 
 ## Status
 
