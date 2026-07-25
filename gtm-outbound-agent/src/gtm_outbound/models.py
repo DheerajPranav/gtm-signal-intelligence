@@ -136,14 +136,28 @@ class CompanyProfile(BaseModel):
 
 
 class FitScore(BaseModel):
-    """ICP fit score from scoring agent."""
+    """ICP fit score from scoring agent.
+
+    `score` is a deterministic weighted mean of the four dimensions (computed in
+    `scoring_agent`, not emitted by the model) so the overall number can never
+    disagree with its own breakdown. `dimension_reasoning` and `cited_signals` are
+    optional so fixtures and earlier callers that only set the numeric fields keep
+    validating; the scoring agent always populates them.
+    """
     score: float = Field(ge=0, le=1)
     firmographic_score: float = Field(ge=0, le=1)
     technographic_score: float = Field(ge=0, le=1)
     behavioral_score: float = Field(ge=0, le=1)
     timing_score: float = Field(ge=0, le=1)
     reasoning: str
+    dimension_reasoning: dict[str, str] = Field(default_factory=dict)
+    cited_signals: list[str] = Field(default_factory=list)
+    icp_source: Optional[str] = None
     model_config = ConfigDict(extra="forbid")
+
+    DIMENSIONS: ClassVar[tuple[str, ...]] = (
+        "firmographic", "technographic", "behavioral", "timing",
+    )
 
 
 class Persona(BaseModel):

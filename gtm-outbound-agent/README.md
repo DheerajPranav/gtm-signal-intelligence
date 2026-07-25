@@ -122,6 +122,39 @@ memory would produce an accuracy figure measured against guesses. The harness ex
 `verified: false` rows and reports `not measured` until a human populates them — see
 [`evals/README.md`](evals/README.md).
 
+## Day 10 — Scoring Agent
+
+`score(profile) -> FitScore` scores ICP fit across four dimensions (firmographic,
+technographic, behavioral, timing) in a single forced tool call, grounded in the
+knowledge base.
+
+- **The ICP comes from the KB, not the prompt.** `KBICPProvider` reads Northstar's
+  canonical `icp-definition.md` from the sibling `gtm-knowledge-base/` corpus at
+  score-time, so the rubric can't drift from the single source of truth the RAG
+  assistant also answers from. The provider is injectable — tests use a static string.
+- **The overall score is derived, not asserted.** The model scores the four dimensions;
+  the headline `score` is a deterministic weighted mean (behavioral + firmographic
+  weighted highest, per the ICP's own emphasis). The number can never contradict its
+  breakdown, and re-weighting is one line, not a re-prompt.
+- **Absence ≠ disqualification.** A field the research agent couldn't source is shown to
+  the model as `(not found)`, so "we looked and it's weak" stays distinct from "we never
+  found out" — only the ICP's explicit hard disqualifiers pull a score to the floor.
+- **Grounded reasoning.** Every score carries per-dimension reasoning plus `cited_signals`
+  quoting the specific profile facts used.
+
+### Eval
+
+15 **fictional** companies (7 strong / 4 weak / 4 not-fit), labeled by construction
+against the ICP — the one place ground truth can be asserted without a live lookup
+(contrast Day 9's real companies). Metrics: **Spearman rank correlation** (DoD gate
+> 0.6) and a **3-band confusion matrix**. Both need live scores, so both are gated:
+no key → `not measured`, never a fabricated correlation.
+
+```bash
+.venv/bin/python evals/run_scoring_eval.py --offline   # gold-set readiness, no key
+.venv/bin/python evals/run_scoring_eval.py             # live run (needs ANTHROPIC_API_KEY)
+```
+
 ## Status
 
 ✅ **Complete (Day 8):**
@@ -132,11 +165,14 @@ memory would produce an accuracy figure measured against guesses. The harness ex
 - Architecture documentation
 
 ✅ **Complete (Day 9):** research agent, sourced profiles, injection fencing,
-enrichment eval harness. 64 tests. Open: needs `ANTHROPIC_API_KEY` + `TAVILY_API_KEY`
+enrichment eval harness. Open: needs `ANTHROPIC_API_KEY` + `TAVILY_API_KEY`
 for a live run, and a human to verify the gold set before accuracy can be reported.
 
+✅ **Complete (Day 10):** scoring agent, KB-grounded ICP rubric, deterministic weighted
+overall, 15-company labeled eval (Spearman + confusion matrix). **94 tests.** Open: live
+Spearman needs `ANTHROPIC_API_KEY`.
+
 ⏳ **Upcoming:**
-- Day 10: Scoring agent (ICP fit)
 - Day 11: Persona agent (buyer discovery)
 - Day 12: Writing agent (email drafting, v2-aware)
 - Day 13: Critique agent (scoring + memory write decision)

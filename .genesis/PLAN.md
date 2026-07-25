@@ -144,6 +144,25 @@ carries its own computed gate, and the flagship (Week 2) composes parts that alr
   memory would score the agent against guesses. `verified: false` rows are excluded and the
   harness reports `not measured`. Mutation-verified: removing the gate yields a false 1.0.
 
+### M10 — Day 10: Scoring agent (ICP fit)  ✅ DONE (live Spearman blocked)
+- **Files:** `gtm-outbound-agent/src/gtm_outbound/{agents/scoring_agent,icp}.py`,
+  `evals/{scoring_gold,run_scoring_eval}.py`, `tests/test_{icp,scoring_agent,scoring_eval}.py`
+- **Demo command:** `cd gtm-outbound-agent && .venv/bin/python -m pytest -q` → 94 passed
+- **DoD:** `score()` returns a valid FitScore with per-dimension reasoning ✅ (fake-client) ·
+  reasoning cites specific profile signals ✅ (`cited_signals`, closed schema) ·
+  rank correlation > 0.6 ⛔ **not measured** (needs `ANTHROPIC_API_KEY`)
+- **Status:** shipped 2026-07-25. Single forced tool call over four dimensions; the ICP is
+  read from the KB's canonical `icp-definition.md` at score-time (`KBICPProvider`, injectable)
+  rather than hard-coded — the first real use of the monorepo coupling. The overall `score`
+  is a deterministic weighted mean of the model's four dimension scores, never emitted by the
+  model, so it cannot contradict its own breakdown. Absent profile fields render `(not found)`
+  so absence stays distinct from a confirmed negative.
+- **Eval:** 15 **fictional** companies (7 strong / 4 weak / 4 none), labeled by construction
+  against the ICP — honest ground truth without a live lookup, unlike Day 9's real companies.
+  Spearman rank correlation (DoD gate > 0.6) + 3-band confusion matrix, both gated to
+  `not measured` with no key. Mutation-verified: replacing the weighted mean with a plain
+  mean makes `test_weights_are_applied_asymmetrically` fail (0.25 vs 0.30).
+
 ---
 
 ## Progress (loops append here on milestone completion — newest last)
@@ -155,4 +174,7 @@ carries its own computed gate, and the flagship (Week 2) composes parts that alr
 - **M5 — Day 5 RAG assistant + UI** — shipped 2026-07-23. RAGAssistant orchestrator: hybrid retrieval (20 candidates) → Haiku reranker (top 5) → Sonnet answer generator with `[source: doc#section]` citations. Streamlit UI with expandable chunks, cost/latency metrics, query history. 7 new tests (33 total). Ready for Day-6 eval harness.
 - **M5 hardening — 2026-07-24.** The Day-5 LLM stages had no tests, and a close read found four defects: (1) reranker validated model-returned indices against the full candidate list while showing only the first 20 — an index >20 crashed with `IndexError` on any query returning >20 candidates; (2) `1.0 - i*0.2` rerank decay saturated every rank past the 5th at 0.0; (3) `answer_gen` computed citations then discarded them, setting `cited_chunks` to every chunk shown, while `rag.py` re-implemented the same regex independently; (4) citations naming absent sources were dropped silently. All fixed; citation parsing centralised in `citations.py`; grounding failures surface as `unresolved_citations`; unpriced models now raise instead of reporting `$0.00`. +28 tests (61 total). Both headline fixes verified by mutation — reverting each makes its regression test fail.
 - **M6 — Day 6 eval harness** — shipped 2026-07-23, **corrected 2026-07-24**. Fabricated metrics removed and the invalid "P@5" replaced with hit_rate / recall / chunk_precision / MRR. Faithfulness + completeness LLM judges implemented. Harness now renders `not measured` for anything it did not compute, and no longer substitutes a hardcoded 50 ms as a measured latency. +23 tests (84 total).
-- **M8 — Day 8 flagship scaffold** — shipped 2026-07-24. `gtm_outbound` package: 13 Pydantic models (8 core + 5 memory), 5 agent stubs, SQLite/Postgres, Langfuse. Fixed 3 schema defects found while testing (variant keying, dangling `superseded_by`, missing rule id). 17 tests.
+- **M8 — Day 8 flagship scaffold** — shipped 2026-07-24. `gtm_outbound` package: 13 Pydantic models (8 core + 5 memory), 5 agent stubs, SQLite/Postgres, Langfuse. Fixed 3 schema defects found while testing (variant keying, dangling `superseded_by`, missing rule id). 28 tests.
+- **M9 — Day 9 research agent** — shipped 2026-07-24. `enrich(domain, provider)` runs a bounded 8-call tool-use loop returning a **sourced** `CompanyProfile` (every value carries `source_url`; unsourceable fields omitted, not guessed). Per-result injection fencing; enrichment eval with deterministic URL-grounding + coverage, field accuracy gated on human-verified ground truth (`not measured`, mutation-verified). 64 tests.
+- **M10 — Day 10 scoring agent** — shipped 2026-07-25. `score(profile) -> FitScore`: single forced tool call over 4 ICP dimensions; ICP read from the KB's canonical `icp-definition.md` at score-time (injectable `KBICPProvider`, first real monorepo coupling); overall score a deterministic weighted mean, never model-emitted; absent fields render `(not found)`. 15 fictional companies labeled by construction (7/4/4) → Spearman + confusion, gated to `not measured` without a key. Mutation-verified weighted mean. 94 tests. (committed `day-10:` in gtm-outbound-agent/)
+- **Repo consolidation — 2026-07-25.** Folded `gtm-outbound-agent` into this monorepo via `git subtree` (Day 8–9 history preserved), deleted the redundant sibling, pushed to `origin` for the first time. Docs updated across README/PLAN/CURRENT.
