@@ -163,6 +163,25 @@ carries its own computed gate, and the flagship (Week 2) composes parts that alr
   `not measured` with no key. Mutation-verified: replacing the weighted mean with a plain
   mean makes `test_weights_are_applied_asymmetrically` fail (0.25 vs 0.30).
 
+### M11 — Day 11: Persona agent (buyer discovery)  ✅ DONE (live metrics blocked)
+- **Files:** `gtm-outbound-agent/src/gtm_outbound/{agents/persona_agent,positioning}.py`,
+  `evals/run_persona_eval.py`, `tests/test_{positioning,persona_agent,persona_eval}.py`
+- **Demo command:** `cd gtm-outbound-agent && .venv/bin/python -m pytest -q` → 122 passed
+- **DoD:** returns 3 fully-populated stakeholder cards ✅ (fake-client) · cards vary by
+  company ✅ (profile fenced into prompt; eval measures distinctness) · cards reference
+  KB language ✅ (positioning injected; lexical grounding proxy) — live grounding/
+  distinctness numbers ⛔ **not measured** (needs `ANTHROPIC_API_KEY`)
+- **Status:** shipped 2026-07-25. Single forced tool call returning N persona cards;
+  positioning read from the KB's `positioning.md` + two buyer-persona pages at build-time
+  (`KBPositioningProvider`, injectable); persona ids assigned in code (`p{i}__{dept}`) for
+  uniqueness rather than trusted from the model. Reuses the scoring agent's `render_profile`.
+- **Eval:** 4 contrasting companies from the scoring gold set. Metrics: exactly-N-complete
+  rate, KB grounding (a shallow lexical proxy vs `POSITIONING_TERMS`, explicitly not a
+  semantic judge — a drift test asserts those terms still live in `positioning.md`), and
+  cross-company distinctness (pairwise Jaccard on pain vocabularies). All gated to
+  `not measured` without a key. Mutation-verified: a constant persona id collapses the
+  uniqueness test (3 → 1).
+
 ---
 
 ## Progress (loops append here on milestone completion — newest last)
@@ -178,3 +197,4 @@ carries its own computed gate, and the flagship (Week 2) composes parts that alr
 - **M9 — Day 9 research agent** — shipped 2026-07-24. `enrich(domain, provider)` runs a bounded 8-call tool-use loop returning a **sourced** `CompanyProfile` (every value carries `source_url`; unsourceable fields omitted, not guessed). Per-result injection fencing; enrichment eval with deterministic URL-grounding + coverage, field accuracy gated on human-verified ground truth (`not measured`, mutation-verified). 64 tests.
 - **M10 — Day 10 scoring agent** — shipped 2026-07-25. `score(profile) -> FitScore`: single forced tool call over 4 ICP dimensions; ICP read from the KB's canonical `icp-definition.md` at score-time (injectable `KBICPProvider`, first real monorepo coupling); overall score a deterministic weighted mean, never model-emitted; absent fields render `(not found)`. 15 fictional companies labeled by construction (7/4/4) → Spearman + confusion, gated to `not measured` without a key. Mutation-verified weighted mean. 94 tests. (committed `day-10:` in gtm-outbound-agent/)
 - **Repo consolidation — 2026-07-25.** Folded `gtm-outbound-agent` into this monorepo via `git subtree` (Day 8–9 history preserved), deleted the redundant sibling, pushed to `origin` for the first time. Docs updated across README/PLAN/CURRENT.
+- **M11 — Day 11 persona agent** — shipped 2026-07-25. `build_personas(profile) -> list[Persona]`: single forced tool call returning 3 company-specific stakeholder cards, grounded in KB positioning (`KBPositioningProvider` reads `positioning.md` + two persona pages; injectable) and the fenced company profile. Persona ids assigned in code for uniqueness. Persona eval over 4 contrasting companies: exactly-N-complete rate, lexical KB-grounding proxy, cross-company distinctness — all gated to `not measured` without a key. Mutation-verified id uniqueness. 122 tests. (committed `day-11:` in gtm-outbound-agent/)

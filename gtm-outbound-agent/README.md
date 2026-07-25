@@ -155,6 +155,34 @@ no key → `not measured`, never a fabricated correlation.
 .venv/bin/python evals/run_scoring_eval.py             # live run (needs ANTHROPIC_API_KEY)
 ```
 
+## Day 11 — Persona Agent
+
+`build_personas(profile) -> list[Persona]` returns N (default 3) buyer-persona
+stakeholder cards in a single forced tool call, grounded in the company profile *and*
+Northstar's KB positioning.
+
+- **Positioning comes from the KB.** `KBPositioningProvider` reads Northstar's
+  `positioning.md` plus the two buyer-persona pages at build-time (injectable, like the
+  scoring agent's ICP), so cards use real Northstar language instead of paraphrase.
+- **Cards are company-specific.** The profile (industry, size, stack, signals) is fenced
+  into the prompt so a fintech and a devtools company get different pain framing — the
+  eval measures this as cross-company distinctness.
+- **Ids are assigned in code** (`p{i}__{department}`), not trusted from the model, so
+  they are unique and stable for joining emails to personas downstream.
+
+### Eval
+
+Runs 4 contrasting companies (fintech / devtools / logistics / RevOps) drawn from the
+scoring gold set. Metrics: exactly-N-complete-cards rate, **KB grounding** (a deliberately
+shallow lexical proxy against Northstar's "words we use" — explicitly not a semantic
+judge), and **cross-company distinctness** (pairwise Jaccard distance of pain vocabularies).
+All three need live output, so all three gate to `not measured` without a key.
+
+```bash
+.venv/bin/python evals/run_persona_eval.py --offline   # readiness, no key
+.venv/bin/python evals/run_persona_eval.py             # live run (needs ANTHROPIC_API_KEY)
+```
+
 ## Status
 
 ✅ **Complete (Day 8):**
@@ -169,11 +197,14 @@ enrichment eval harness. Open: needs `ANTHROPIC_API_KEY` + `TAVILY_API_KEY`
 for a live run, and a human to verify the gold set before accuracy can be reported.
 
 ✅ **Complete (Day 10):** scoring agent, KB-grounded ICP rubric, deterministic weighted
-overall, 15-company labeled eval (Spearman + confusion matrix). **94 tests.** Open: live
+overall, 15-company labeled eval (Spearman + confusion matrix). Open: live
 Spearman needs `ANTHROPIC_API_KEY`.
 
+✅ **Complete (Day 11):** persona agent, KB positioning grounding, company-specific
+cards, persona eval (count / grounding proxy / distinctness). **122 tests.** Open: live
+metrics need `ANTHROPIC_API_KEY`.
+
 ⏳ **Upcoming:**
-- Day 11: Persona agent (buyer discovery)
 - Day 12: Writing agent (email drafting, v2-aware)
 - Day 13: Critique agent (scoring + memory write decision)
 - Day 14: Integration + evals

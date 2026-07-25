@@ -1,10 +1,10 @@
 # CURRENT
 - active_loop: L1 BUILD (exited through L4 VERIFY)
-- target: M10 Day 10 scoring agent — complete
+- target: M11 Day 11 persona agent — complete
 - iteration: 1
-- last_gate: G4 QUALITY — 84 tests green in gtm-knowledge-base, 94 in gtm-outbound-agent (computed)
-- last_action: built Day 10 scoring agent (KB-grounded ICP rubric, deterministic weighted FitScore, 15-company Spearman/confusion eval); +30 tests; mutation-verified the weighted mean
-- next_action: Day 11 persona agent — OR obtain ANTHROPIC_API_KEY and close out Day 7 + live Day 9/10 metrics
+- last_gate: G4 QUALITY — 84 tests green in gtm-knowledge-base, 122 in gtm-outbound-agent (computed)
+- last_action: built Day 11 persona agent (KB positioning grounding, 3 company-specific cards, persona eval); +28 tests; mutation-verified persona id uniqueness
+- next_action: Day 12 writing agent (email drafting + async fan-out) — OR obtain ANTHROPIC_API_KEY and close out Day 7 + live Day 9/10/11 metrics
 - model: claude-opus-4-8
 - tokens_budget: 50000/milestone
 - skills_loaded: [genesis]
