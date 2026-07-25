@@ -23,8 +23,9 @@ A four-week (28-day) applied-AI engineering sprint building a portfolio of GTM (
 | 5 | RAG assistant — hybrid retrieval + rerank → cited answers + Streamlit UI + cost tracking | `pytest -q` → 61 pass | ✅ |
 | 6 | Golden eval set (35 Qs) + eval harness — retrieval metrics + LLM judges | `python evals/run_eval.py` → report.md | ✅ |
 | 7 | Deploy + Loom + LinkedIn ship | Live URL + Loom link | 🚧 blocked on API key — README + post *draft* only |
-| 8 | Flagship scaffold — multi-agent models + observability + memory schema | `pytest -q` → 17 pass | ✅ |
-| 9–28 | Research/scoring/persona/writing/critique agents, then the v2 learning loop | _tbd_ | ⏳ |
+| 8 | Flagship scaffold — multi-agent models + observability + memory schema (SQLite/Postgres) | `pytest -q` → 28 pass | ✅ |
+| 9 | Research agent — bounded tool-use loop → **sourced** `CompanyProfile` + enrichment eval harness | `pytest -q` → 64 pass | ✅ |
+| 10–28 | Scoring/persona/writing/critique agents, then the v2 learning loop | _tbd_ | ⏳ |
 
 **API spend to date:** `$0.00`. Every gate above is verified offline — deterministic
 embeddings and injected fake LLM clients. No live model output is reported anywhere.
@@ -47,11 +48,15 @@ gtm-signal-intelligence/
 │   ├── src/gtm_cli_warmup/ describe.py · lead.py · cost.py · pricing.py · cli.py
 │   ├── tests/              offline mock-based tests (no API calls)
 │   └── notebooks/          lead-extractor demo (key-aware; FIXTURE fallback)
-├── gtm-knowledge-base/     Days 3–4 — Northstar corpus + RAG retrieval layer
+├── gtm-knowledge-base/     Days 3–7 — Northstar corpus + RAG retrieval + cited answers + evals
 │   ├── data/northstar/     product · sales · case-studies · marketing · company
-│   ├── src/gtm_kb/         chunker · embeddings · Chroma+BM25 · ingest · query
-│   ├── tests/              26 offline tests
+│   ├── src/gtm_kb/         chunker · embeddings · Chroma+BM25 · ingest · query · rerank · answer
+│   ├── evals/              golden set + retrieval metrics + LLM judges
 │   └── scripts/            check_corpus.sh
+├── gtm-outbound-agent/     Days 8+ — flagship multi-agent outbound system (folded in from its own repo, history intact)
+│   ├── src/gtm_outbound/   agents/ · tools/ · models · tables · db (SQLite/Postgres)
+│   ├── evals/              enrichment gold set + grounding/coverage/accuracy harness
+│   └── docs/               architecture (v1 pipeline + v2 learning loop)
 ├── .genesis/               engineering spine — plan, milestones, decisions, context graph
 └── gtm_ai_sprint_master_plan.md   the full 4-week roadmap
 ```
@@ -78,10 +83,10 @@ streamlit run app.py                   # -> UI, demo mode needs no key
 # Day 6 full run — adds faithfulness + completeness judges (needs a key)
 .venv/bin/python evals/run_eval.py --full
 
-# Day 8 — flagship scaffold
-cd ../../gtm-outbound-agent
+# Days 8–9 — flagship outbound agent (scaffold + research agent)
+cd ../gtm-outbound-agent          # now a sibling folder inside this repo
 python -m venv .venv && .venv/bin/pip install -e ".[dev]"
-.venv/bin/python -m pytest -q          # -> 17 passed
+.venv/bin/python -m pytest -q          # -> 64 passed
 ```
 
 ## Highlights so far

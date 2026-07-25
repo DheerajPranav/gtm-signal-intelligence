@@ -114,7 +114,7 @@ carries its own computed gate, and the flagship (Week 2) composes parts that alr
 - **Files:** `gtm-outbound-agent/src/gtm_outbound/**`, `gtm-outbound-agent/tests/**`, `docs/architecture.md`
 - **Demo command:** `cd gtm-outbound-agent && .venv/bin/python -m pytest -q` → 28 passed
 - **DoD:** scaffold ✅ · architecture doc ✅ · models ✅ · **migrations ✅ (3 tables)** ·
-  Langfuse test event ⛔ needs `LANGFUSE_*` keys · push ⛔ no remote configured
+  Langfuse test event ⛔ needs `LANGFUSE_*` keys · push ✅ folded into `gtm-signal-intelligence` monorepo (subtree, history intact)
 - **Migration defect (fixed 2026-07-24):** `init_db()` called `create_all()` while every
   model was a plain `BaseModel`, so nothing was ever registered — it ran cleanly and
   created **zero tables**. Added `tables.py` (SQLModel rows + domain converters), made the

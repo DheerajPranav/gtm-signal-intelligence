@@ -74,7 +74,7 @@ At write-time, a **retrieval router** queries all three layers and stuffs the co
 - [x] Agent stubs (5 agents with signatures)
 - [x] 28 tests pass
 - [ ] Langfuse dashboard shows a test event — **blocked**, needs `LANGFUSE_*` keys
-- [ ] Pushed — no remote configured yet
+- [x] Pushed — folded into the `gtm-signal-intelligence` monorepo (history preserved via `git subtree`)
 
 ```bash
 python -m venv .venv && .venv/bin/pip install -e ".[dev]"
