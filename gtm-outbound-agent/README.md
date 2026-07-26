@@ -212,6 +212,34 @@ source data, not a semantic judge), and wall-clock (DoD target < 90s, live-only)
 .venv/bin/python evals/run_writing_eval.py             # live run (needs ANTHROPIC_API_KEY)
 ```
 
+## Day 13 — Critique Agent + Account Brief
+
+`evaluate(email, persona, profile) -> EmailEval` scores five dimensions in one forced tool
+call; `run_company(domain)` chains all five agents into a shippable `runs/<domain>.md`.
+
+- **A skeptical judge, on purpose.** The rubric (personalization, relevance, CTA, spam-risk
+  inverted, would-send) instructs a *discerning SDR manager* who defaults to "no" — the standard
+  guard against LLM-judge sycophancy. Runs on **Haiku** (cheap, 9× per company).
+- **Memory decision, not a duplicated threshold.** `critique(...)` returns the eval *and* a
+  `MemoryWriteDecision` by applying the Day-8 `decide_memory_write` policy — so the critique owns
+  no admission number of its own and can't drift from the writer/eval/consolidation.
+- **The brief is deterministic.** `brief.py` assembles + renders markdown with no LLM: would-send
+  pass rate at the top, sourced company summary, ICP-fit table, persona cards, per-persona emails
+  with inline verdicts, cost/latency. Unfound fields render `_not found_`, never fabricated.
+- **Honest cost.** Latency is real wall-clock; per-call token cost isn't wired yet (it lands with
+  observability), so the brief reports `$0` rather than a made-up number.
+
+### Eval
+
+A 6-email calibration set (3 clearly-good / 3 clearly-spammy, would-send labels honest by
+construction). Metrics: would-send agreement vs label + spam-gap (bad − good). Gated to
+`not measured` without a key.
+
+```bash
+.venv/bin/python evals/run_critique_eval.py --offline   # readiness, no key
+.venv/bin/python evals/run_critique_eval.py             # live run (needs ANTHROPIC_API_KEY)
+```
+
 ## Status
 
 ✅ **Complete (Day 8):**
@@ -235,11 +263,16 @@ metrics need `ANTHROPIC_API_KEY`.
 
 ✅ **Complete (Day 12):** async writing agent, 3 angles per persona, shared-semaphore
 fan-out (9 emails/company), peer-proof KB grounding, v2 memory injection, writing eval.
-**151 tests.** Open: live 9-email run + wall-clock need `ANTHROPIC_API_KEY`.
+Open: live 9-email run + wall-clock need `ANTHROPIC_API_KEY`.
+
+✅ **Complete (Day 13):** critique agent (5-dim skeptical rubric + memory-write decision),
+`run_company` pipeline chaining all five agents, deterministic Account Brief markdown,
+critique calibration eval. **177 tests.** Open: live `run_company` run + per-call cost
+tracking need `ANTHROPIC_API_KEY` + observability wiring.
 
 ⏳ **Upcoming:**
-- Day 13: Critique agent (scoring + memory write decision)
-- Day 14: Integration + evals
+- Day 14: Publish KB blog post + mid-sprint check-in
+- Week 5–6: v2 learning loop (episodic/semantic/procedural memory, consolidation, ablation)
 
 📅 **Week 5-6 extension (v2 Learning Loop):**
 - Episodic + semantic + procedural memory layers

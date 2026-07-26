@@ -102,5 +102,38 @@ wall-clock (DoD target < 90s, meaningful only live). All model-dependent metrics
 **Verified:** 151 tests (+29). Async tests drive coroutines with `asyncio.run` (no event-loop
 plugin). The concurrency bound is covered by a **probe client** that records max simultaneous
 in-flight calls and asserts it never exceeds the semaphore (2 with `max_concurrency=2` over 9
-calls) while still parallelising. **Open:** live 9-email run + wall-clock need `ANTHROPIC_API_KEY`;
-Langfuse call tagging deferred with the rest of the observability wiring.
+calls) while still parallelising — mutation-verified (unbounded semaphore → 9 simultaneous →
+test fails). **Open:** live 9-email run + wall-clock need `ANTHROPIC_API_KEY`; Langfuse call
+tagging deferred with the rest of the observability wiring.
+
+## Day 13 (2026-07-26) — Critique agent + Account Brief
+
+**What shipped:** the fifth agent and the assembly layer that turns five agents' output into a
+shippable document.
+
+- **Critique agent** — `evaluate(email, persona, profile) -> EmailEval`: a single forced tool
+  call scoring five dimensions (personalization, relevance, CTA, spam-risk inverted, would-send)
+  with a *deliberately skeptical* rubric to avoid judge sycophancy. Runs on **Haiku** (cheap;
+  9× per company). `critique(...)` returns the eval **and** a `MemoryWriteDecision` by applying
+  the Day-8 `decide_memory_write` policy — the agent owns no threshold of its own, so writer /
+  critique / eval / consolidation can't drift apart.
+- **Account Brief** — `brief.py` (`assemble_brief` + `render_brief_md`, pure/deterministic, no
+  LLM) produces a GitHub-renderable markdown doc: **would-send pass rate at the top**, company
+  summary with sourced links, ICP fit table, persona cards, emails grouped per persona with
+  inline critique verdicts, and cost/latency. Unfound profile fields render `_not found_`, never
+  fabricated.
+- **Pipeline** — `pipeline.py::run_company(domain)` chains all five agents (sync research/score/
+  persona/critique inline, async writing fan-out, the 9 critiques run concurrently via
+  `asyncio.to_thread`), assembles the brief, and writes `runs/<domain>.md`. Latency is real
+  wall-clock; **cost is passed through as 0.0 — per-call token accounting isn't wired yet** (it
+  lands with observability), so the brief reports 0 rather than a fabricated figure.
+
+**Eval:** `run_critique_eval.py` — a 6-email calibration set (3 clearly-good / 3 clearly-spammy,
+would-send labels honest by construction). Metrics: would-send agreement vs label, and spam-gap
+(bad − good spam-risk, should be clearly positive). Gated to `not measured` without a key.
+
+**Verified:** 177 tests (+26). The whole pipeline is exercised end-to-end offline by a **routing
+fake client** that dispatches by the forced tool name (order-independent), producing a real brief
+file. Mutation-verified the would-send pass rate (dropping the `would_send` filter inflates it to
+100% and two tests catch it). **Open:** live `run_company` run + Langfuse tagging + per-call cost
+tracking need `ANTHROPIC_API_KEY` and the observability wiring.

@@ -1,11 +1,12 @@
 # CURRENT
 - active_loop: L1 BUILD (exited through L4 VERIFY)
-- target: M12 Day 12 writing agent + async fan-out — complete
+- target: M13 Day 13 critique agent + Account Brief — complete
 - iteration: 1
-- last_gate: G4 QUALITY — 84 tests green in gtm-knowledge-base, 151 in gtm-outbound-agent (computed)
-- last_action: built Day 12 async writing agent (3 angles, shared-semaphore fan-out, peer-proof KB grounding, v2 memory injection, writing eval) + backfilled outbound PROGRESS.md; +29 tests
-- next_action: run the deferred semaphore mutation check, then Day 13 critique agent (scoring + memory-write decision) — OR obtain ANTHROPIC_API_KEY and close out Day 7 + live Day 9/10/11/12 metrics
-- deferred_verify: revert-and-fail mutation check on the Day-12 semaphore bound not yet run
+- last_gate: G4 QUALITY — 84 tests green in gtm-knowledge-base, 177 in gtm-outbound-agent (computed)
+- last_action: built Day 13 critique agent (5-dim skeptical rubric + memory-write decision), run_company pipeline, deterministic Account Brief, critique eval; +26 tests; mutation-verified would-send pass rate; also cleared the deferred Day-12 semaphore mutation check (passed)
+- next_action: Day 14 (publish KB blog post + mid-sprint check-in) — OR obtain ANTHROPIC_API_KEY and close out Day 7 + all live Day 9-13 metrics
+- deferred_verify: none — Day-12 semaphore mutation check completed 2026-07-26
+- known_gaps: per-call token cost not tracked (brief reports $0, real latency); Langfuse tagging unwired — both deferred to the observability pass
 - model: claude-opus-4-8
 - tokens_budget: 50000/milestone
 - skills_loaded: [genesis]

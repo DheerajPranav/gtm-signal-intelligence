@@ -201,8 +201,31 @@ carries its own computed gate, and the flagship (Week 2) composes parts that alr
   `not measured` without a key.
 - **Async testing:** coroutines driven by `asyncio.run` (no pytest-asyncio). The semaphore bound
   is covered by a probe client that records max simultaneous in-flight calls and asserts it never
-  exceeds `max_concurrency` (2 over 9 calls) while still parallelising. (Revert-and-fail mutation
-  check on the semaphore not yet run — flagged for the next verify pass.)
+  exceeds `max_concurrency` (2 over 9 calls) while still parallelising. **Mutation-verified
+  2026-07-26:** unbounding the semaphore (`Semaphore(1000)`) drives 9 simultaneous calls and the
+  probe test fails; clean restore.
+
+### M13 — Day 13: Critique agent + Account Brief  ✅ DONE (live run blocked)
+- **Files:** `gtm-outbound-agent/src/gtm_outbound/{agents/critique_agent,brief,pipeline}.py`,
+  `evals/run_critique_eval.py`, `tests/test_{critique_agent,brief,pipeline,critique_eval}.py`
+- **Demo command:** `cd gtm-outbound-agent && .venv/bin/python -m pytest -q` → 177 passed
+- **DoD:** `run_company()` produces a complete `AccountBrief.md` saved to `runs/` ✅ (fake-client
+  integration test) · brief opens cleanly as GitHub markdown ✅ (rendered + eyeballed) ·
+  would-send pass rate at the top ✅ · live `run_company` run ⛔ needs `ANTHROPIC_API_KEY`
+- **Status:** shipped 2026-07-26. Critique = single forced tool call, 5-dim skeptical rubric on
+  Haiku; `critique()` also returns a `MemoryWriteDecision` via the Day-8 `decide_memory_write`
+  policy (no threshold owned here). `brief.py` is pure/deterministic (no LLM): would-send rate at
+  top, sourced company summary, ICP-fit table, persona cards, per-persona emails with inline
+  verdicts, cost/latency; unfound fields render `_not found_`. `pipeline.py::run_company` chains
+  all five agents (sync inline + async writing + concurrent critiques via `asyncio.to_thread`)
+  and writes `runs/<domain>.md`.
+- **Known limitation:** per-call token cost is not tracked — the brief reports `cost=$0` (real
+  wall-clock latency). Cost accounting is deferred to the observability wiring, and stated as such
+  rather than fabricated.
+- **Eval:** 6-email calibration set (3 good / 3 spammy, would-send labels honest by construction);
+  would-send agreement + spam-gap, gated to `not measured`. Mutation-verified the would-send pass
+  rate (drop the `would_send` filter → 100%, two tests catch it). Full pipeline exercised offline
+  by a routing fake client that dispatches on the forced tool name.
 
 ---
 
@@ -220,4 +243,5 @@ carries its own computed gate, and the flagship (Week 2) composes parts that alr
 - **M10 — Day 10 scoring agent** — shipped 2026-07-25. `score(profile) -> FitScore`: single forced tool call over 4 ICP dimensions; ICP read from the KB's canonical `icp-definition.md` at score-time (injectable `KBICPProvider`, first real monorepo coupling); overall score a deterministic weighted mean, never model-emitted; absent fields render `(not found)`. 15 fictional companies labeled by construction (7/4/4) → Spearman + confusion, gated to `not measured` without a key. Mutation-verified weighted mean. 94 tests. (committed `day-10:` in gtm-outbound-agent/)
 - **Repo consolidation — 2026-07-25.** Folded `gtm-outbound-agent` into this monorepo via `git subtree` (Day 8–9 history preserved), deleted the redundant sibling, pushed to `origin` for the first time. Docs updated across README/PLAN/CURRENT.
 - **M11 — Day 11 persona agent** — shipped 2026-07-25. `build_personas(profile) -> list[Persona]`: single forced tool call returning 3 company-specific stakeholder cards, grounded in KB positioning (`KBPositioningProvider` reads `positioning.md` + two persona pages; injectable) and the fenced company profile. Persona ids assigned in code for uniqueness. Persona eval over 4 contrasting companies: exactly-N-complete rate, lexical KB-grounding proxy, cross-company distinctness — all gated to `not measured` without a key. Mutation-verified id uniqueness. 122 tests. (committed `day-11:` in gtm-outbound-agent/)
-- **M12 — Day 12 writing agent + async fan-out** — shipped 2026-07-26. First async agent. `draft_emails(profile, persona)` writes 3 angle variants (pain / trigger / peer-proof) concurrently; `draft_all(profile, personas)` fans out across personas (9 emails/company) with one shared `asyncio.Semaphore` (default 5) bounding in-flight LLM calls run-wide. Peer-proof reads a segment-matched KB case study (`KBPeerProofProvider`). Subject/body/hook limits schema-checked; v2-aware memory injection optional. Writing eval: count / angle coverage / limit compliance / hook-traceability proxy / wall-clock, gated to `not measured` without a key. Concurrency covered by a probe test. 151 tests. (committed `day-12:` in gtm-outbound-agent/)
+- **M12 — Day 12 writing agent + async fan-out** — shipped 2026-07-26. First async agent. `draft_emails(profile, persona)` writes 3 angle variants (pain / trigger / peer-proof) concurrently; `draft_all(profile, personas)` fans out across personas (9 emails/company) with one shared `asyncio.Semaphore` (default 5) bounding in-flight LLM calls run-wide. Peer-proof reads a segment-matched KB case study (`KBPeerProofProvider`). Subject/body/hook limits schema-checked; v2-aware memory injection optional. Writing eval: count / angle coverage / limit compliance / hook-traceability proxy / wall-clock, gated to `not measured` without a key. Concurrency probe test mutation-verified. 151 tests. (committed `day-12:` in gtm-outbound-agent/)
+- **M13 — Day 13 critique agent + Account Brief** — shipped 2026-07-26. `evaluate(email, persona, profile)` = single forced Haiku tool call, 5-dim skeptical rubric; `critique()` also returns a `MemoryWriteDecision` via the Day-8 policy (no threshold owned here). `brief.py` renders a deterministic GitHub-markdown Account Brief (would-send rate at top, sourced summary, ICP-fit table, persona cards, per-persona emails with verdicts, cost/latency; unfound fields `_not found_`). `pipeline.py::run_company` chains all five agents (async writing + concurrent critiques via `asyncio.to_thread`) → `runs/<domain>.md`. Cost tracking deferred (brief reports $0, real latency). Critique calibration eval (6 emails, would-send agreement + spam-gap), gated. Full pipeline exercised offline by a routing fake; pass-rate mutation-verified. 177 tests. (committed `day-13:` in gtm-outbound-agent/)
