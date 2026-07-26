@@ -75,3 +75,32 @@ KB-grounding proxy** (vs `POSITIONING_TERMS`, explicitly not a semantic judge, d
 against `positioning.md`), and **cross-company distinctness** (pairwise Jaccard on pain
 vocabularies). All gated to `not measured` without a key. Mutation-verified persona-id
 uniqueness (constant id → 3 collapse to 1). +28 tests (122 total).
+
+## Day 12 (2026-07-26) — Writing agent + async fan-out
+
+**What shipped:** the first **async** agent. `draft_emails(profile, persona) -> list[EmailDraft]`
+produces three variants that differ in *angle*, not just wording: **pain-led** (persona's
+sharpest pain in Northstar language), **trigger-led** (a recent event from the profile), and
+**peer-proof** (a segment-matched Northstar customer story). `draft_all(profile, personas)`
+fans out across personas — 3 personas × 3 variants = 9 emails — with every LLM call passing
+through **one shared `asyncio.Semaphore` (default 5)**, so total in-flight requests stay
+bounded regardless of company size. Each variant is a single forced tool call; subject
+(≤60 chars), body (≤120 words), and exactly 3 personalization hooks are schema/limit-checked.
+
+**Grounding:** the peer-proof angle reads a segment-matched case study from the KB
+(`KBPeerProofProvider` picks fintech / devtools / marketing / default by industry). Variant
+ids are `{persona.id}__{angle}`, unique run-wide. **v2-aware:** an optional
+`MemoryRetrievalResult` fences `<applicable_rules>`/`<successful_examples>`/`<account_history>`
+into the prompt; with no memory (the v1 path) it drafts from profile + KB only.
+
+**Eval:** `run_writing_eval.py` over one company × 3 personas → 9 emails. Metrics: email count,
+angle coverage, subject/body/hooks limit compliance, **hook traceability** (a lexical proxy —
+a hook must share ≥2 content words with the source data, explicitly not a semantic judge), and
+wall-clock (DoD target < 90s, meaningful only live). All model-dependent metrics gated to
+`not measured` without a key.
+
+**Verified:** 151 tests (+29). Async tests drive coroutines with `asyncio.run` (no event-loop
+plugin). The concurrency bound is covered by a **probe client** that records max simultaneous
+in-flight calls and asserts it never exceeds the semaphore (2 with `max_concurrency=2` over 9
+calls) while still parallelising. **Open:** live 9-email run + wall-clock need `ANTHROPIC_API_KEY`;
+Langfuse call tagging deferred with the rest of the observability wiring.

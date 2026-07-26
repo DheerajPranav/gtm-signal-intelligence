@@ -27,7 +27,8 @@ A four-week (28-day) applied-AI engineering sprint building a portfolio of GTM (
 | 9 | Research agent — bounded tool-use loop → **sourced** `CompanyProfile` + enrichment eval harness | `pytest -q` → 64 pass | ✅ |
 | 10 | Scoring agent — KB-grounded ICP rubric, 4-dim weighted `FitScore` + 15-company Spearman/confusion eval | `pytest -q` → 94 pass | ✅ |
 | 11 | Persona agent — 3 KB-grounded, company-specific stakeholder cards + persona eval (grounding/distinctness) | `pytest -q` → 122 pass | ✅ |
-| 12–28 | Writing/critique agents, then the v2 learning loop | _tbd_ | ⏳ |
+| 12 | Writing agent — async fan-out, 3 angles/persona (9 emails), peer-proof KB grounding, v2 memory injection + eval | `pytest -q` → 151 pass | ✅ |
+| 13–28 | Critique agent, then the v2 learning loop | _tbd_ | ⏳ |
 
 **API spend to date:** `$0.00`. Every gate above is verified offline — deterministic
 embeddings and injected fake LLM clients. No live model output is reported anywhere.

@@ -182,6 +182,28 @@ carries its own computed gate, and the flagship (Week 2) composes parts that alr
   `not measured` without a key. Mutation-verified: a constant persona id collapses the
   uniqueness test (3 → 1).
 
+### M12 — Day 12: Writing agent + async fan-out  ✅ DONE (live run blocked)
+- **Files:** `gtm-outbound-agent/src/gtm_outbound/{agents/writing_agent,peerproof}.py`,
+  `evals/run_writing_eval.py`, `tests/test_{peerproof,writing_agent,writing_eval}.py`
+- **Demo command:** `cd gtm-outbound-agent && .venv/bin/python -m pytest -q` → 151 passed
+- **DoD:** 3 personas × 3 variants = 9 emails ✅ (fake-client `draft_all`) · variants differ by
+  angle ✅ (pain / trigger / peer-proof) · hooks traceable to profile or KB ✅ (schema + lexical
+  proxy) · wall-clock < 90s ⛔ **not measured** (live) · Langfuse tagging ⛔ needs keys
+- **Status:** shipped 2026-07-26. First async agent. `draft_emails` writes the 3 angle
+  variants concurrently; `draft_all` fans out across personas. Every LLM call passes through
+  **one shared `asyncio.Semaphore`** (default 5) so in-flight requests stay bounded run-wide.
+  Peer-proof reads a segment-matched KB case study (`KBPeerProofProvider`). Subject/body/hook
+  limits are schema- and limit-checked. v2-aware: an optional `MemoryRetrievalResult` fences
+  learned rules / examples / account history into the prompt; the v1 path (no memory) drafts
+  from profile + KB. Reuses `render_profile`.
+- **Eval:** 1 company × 3 personas → 9 emails; email count, angle coverage, limit compliance,
+  hook-traceability proxy (≥2 shared content words with the source data), wall-clock. Gated to
+  `not measured` without a key.
+- **Async testing:** coroutines driven by `asyncio.run` (no pytest-asyncio). The semaphore bound
+  is covered by a probe client that records max simultaneous in-flight calls and asserts it never
+  exceeds `max_concurrency` (2 over 9 calls) while still parallelising. (Revert-and-fail mutation
+  check on the semaphore not yet run — flagged for the next verify pass.)
+
 ---
 
 ## Progress (loops append here on milestone completion — newest last)
@@ -198,3 +220,4 @@ carries its own computed gate, and the flagship (Week 2) composes parts that alr
 - **M10 — Day 10 scoring agent** — shipped 2026-07-25. `score(profile) -> FitScore`: single forced tool call over 4 ICP dimensions; ICP read from the KB's canonical `icp-definition.md` at score-time (injectable `KBICPProvider`, first real monorepo coupling); overall score a deterministic weighted mean, never model-emitted; absent fields render `(not found)`. 15 fictional companies labeled by construction (7/4/4) → Spearman + confusion, gated to `not measured` without a key. Mutation-verified weighted mean. 94 tests. (committed `day-10:` in gtm-outbound-agent/)
 - **Repo consolidation — 2026-07-25.** Folded `gtm-outbound-agent` into this monorepo via `git subtree` (Day 8–9 history preserved), deleted the redundant sibling, pushed to `origin` for the first time. Docs updated across README/PLAN/CURRENT.
 - **M11 — Day 11 persona agent** — shipped 2026-07-25. `build_personas(profile) -> list[Persona]`: single forced tool call returning 3 company-specific stakeholder cards, grounded in KB positioning (`KBPositioningProvider` reads `positioning.md` + two persona pages; injectable) and the fenced company profile. Persona ids assigned in code for uniqueness. Persona eval over 4 contrasting companies: exactly-N-complete rate, lexical KB-grounding proxy, cross-company distinctness — all gated to `not measured` without a key. Mutation-verified id uniqueness. 122 tests. (committed `day-11:` in gtm-outbound-agent/)
+- **M12 — Day 12 writing agent + async fan-out** — shipped 2026-07-26. First async agent. `draft_emails(profile, persona)` writes 3 angle variants (pain / trigger / peer-proof) concurrently; `draft_all(profile, personas)` fans out across personas (9 emails/company) with one shared `asyncio.Semaphore` (default 5) bounding in-flight LLM calls run-wide. Peer-proof reads a segment-matched KB case study (`KBPeerProofProvider`). Subject/body/hook limits schema-checked; v2-aware memory injection optional. Writing eval: count / angle coverage / limit compliance / hook-traceability proxy / wall-clock, gated to `not measured` without a key. Concurrency covered by a probe test. 151 tests. (committed `day-12:` in gtm-outbound-agent/)

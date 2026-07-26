@@ -183,6 +183,35 @@ All three need live output, so all three gate to `not measured` without a key.
 .venv/bin/python evals/run_persona_eval.py             # live run (needs ANTHROPIC_API_KEY)
 ```
 
+## Day 12 — Writing Agent + async fan-out
+
+The first **async** agent. `draft_emails(profile, persona) -> list[EmailDraft]` writes three
+variants that differ in *angle*; `draft_all(profile, personas)` fans out across personas.
+
+- **Three angles, not three rewordings.** `pain` (persona's sharpest pain in Northstar
+  language), `trigger` (a datable event from the profile), `peer_proof` (a segment-matched
+  Northstar customer story read from the KB via `KBPeerProofProvider`).
+- **One shared semaphore for the whole run.** Variants within a persona and personas across a
+  company draft concurrently, but every LLM call passes through a single `asyncio.Semaphore`
+  (default 5), so in-flight requests stay bounded no matter how many personas — the rate limit
+  belongs to the run, not the persona.
+- **Hard limits are structural.** Subject ≤ 60 chars, body ≤ 120 words, exactly 3
+  personalization hooks (schema-enforced); the eval measures compliance and hook traceability.
+- **v2-aware.** An optional `MemoryRetrievalResult` fences learned rules / example emails /
+  account history into the prompt. With no memory (the v1 path) it drafts from profile + KB.
+
+### Eval
+
+One company × 3 personas → 9 emails. Metrics: email count, angle coverage, subject/body/hooks
+compliance, **hook traceability** (lexical proxy — a hook must share ≥2 content words with the
+source data, not a semantic judge), and wall-clock (DoD target < 90s, live-only). Gated to
+`not measured` without a key.
+
+```bash
+.venv/bin/python evals/run_writing_eval.py --offline   # readiness, no key
+.venv/bin/python evals/run_writing_eval.py             # live run (needs ANTHROPIC_API_KEY)
+```
+
 ## Status
 
 ✅ **Complete (Day 8):**
@@ -201,11 +230,14 @@ overall, 15-company labeled eval (Spearman + confusion matrix). Open: live
 Spearman needs `ANTHROPIC_API_KEY`.
 
 ✅ **Complete (Day 11):** persona agent, KB positioning grounding, company-specific
-cards, persona eval (count / grounding proxy / distinctness). **122 tests.** Open: live
+cards, persona eval (count / grounding proxy / distinctness). Open: live
 metrics need `ANTHROPIC_API_KEY`.
 
+✅ **Complete (Day 12):** async writing agent, 3 angles per persona, shared-semaphore
+fan-out (9 emails/company), peer-proof KB grounding, v2 memory injection, writing eval.
+**151 tests.** Open: live 9-email run + wall-clock need `ANTHROPIC_API_KEY`.
+
 ⏳ **Upcoming:**
-- Day 12: Writing agent (email drafting, v2-aware)
 - Day 13: Critique agent (scoring + memory write decision)
 - Day 14: Integration + evals
 

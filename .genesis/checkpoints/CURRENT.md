@@ -1,10 +1,11 @@
 # CURRENT
 - active_loop: L1 BUILD (exited through L4 VERIFY)
-- target: M11 Day 11 persona agent — complete
+- target: M12 Day 12 writing agent + async fan-out — complete
 - iteration: 1
-- last_gate: G4 QUALITY — 84 tests green in gtm-knowledge-base, 122 in gtm-outbound-agent (computed)
-- last_action: built Day 11 persona agent (KB positioning grounding, 3 company-specific cards, persona eval); +28 tests; mutation-verified persona id uniqueness
-- next_action: Day 12 writing agent (email drafting + async fan-out) — OR obtain ANTHROPIC_API_KEY and close out Day 7 + live Day 9/10/11 metrics
+- last_gate: G4 QUALITY — 84 tests green in gtm-knowledge-base, 151 in gtm-outbound-agent (computed)
+- last_action: built Day 12 async writing agent (3 angles, shared-semaphore fan-out, peer-proof KB grounding, v2 memory injection, writing eval) + backfilled outbound PROGRESS.md; +29 tests
+- next_action: run the deferred semaphore mutation check, then Day 13 critique agent (scoring + memory-write decision) — OR obtain ANTHROPIC_API_KEY and close out Day 7 + live Day 9/10/11/12 metrics
+- deferred_verify: revert-and-fail mutation check on the Day-12 semaphore bound not yet run
 - model: claude-opus-4-8
 - tokens_budget: 50000/milestone
 - skills_loaded: [genesis]
