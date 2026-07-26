@@ -57,3 +57,27 @@ Guidance:
 
 Rows with `verified: false` are excluded from field accuracy and counted separately, so
 the report always states how much of the set actually backed the number.
+
+---
+
+# Other evals in this directory
+
+The same discipline applies to every harness here: anything needing a live model call is
+**gated** — with no `ANTHROPIC_API_KEY` the run reports readiness and prints `not measured`
+rather than a fabricated figure. All three have an `--offline` mode.
+
+| Harness | Day | Ground truth | Live metrics |
+|---|---|---|---|
+| `run_enrichment_eval.py` | 9 | 10 real companies (`enrichment_gold.jsonl`), **unverified by design** | field accuracy (gated on human verification) |
+| `run_scoring_eval.py` | 10 | 15 **fictional** companies (`scoring_gold.py`), labeled by construction | Spearman rank correlation (DoD > 0.6) + 3-band confusion |
+| `run_persona_eval.py` | 11 | 4 contrasting companies (reused from `scoring_gold.py`) | exactly-N-complete rate, KB-grounding proxy, cross-company distinctness |
+
+Why the scoring/persona gold sets *can* assert ground truth while enrichment can't: their
+companies are **fictional and constructed against a rubric**, so the intended label is known
+by design. The enrichment set describes **real** companies, whose headcount and funding
+can't be verified from memory — so that one stays empty until a human fills it in.
+
+```bash
+.venv/bin/python evals/run_scoring_eval.py --offline
+.venv/bin/python evals/run_persona_eval.py --offline
+```
