@@ -14,14 +14,13 @@ import logging
 import time
 import uuid
 from dataclasses import dataclass, asdict
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional
 
-from sqlalchemy import create_engine, select, update
-from sqlalchemy.orm import Session
+from sqlalchemy import create_engine
 
-from .db import init_db, tables
+from .db import init_db
 from .pipeline import run_company
 
 
@@ -61,32 +60,29 @@ class BatchRunner:
         self.max_concurrent = max_concurrent
         self.engine = create_engine(f"sqlite:///{db_path}")
         # Ensure tables exist
-        init_db(self.engine)
+        init_db(url=f"sqlite:///{db_path}")
 
     def create_batch(self, domains: list[str]) -> str:
         """Create a new batch run."""
         run_id = str(uuid.uuid4())[:8]
         batch = BatchRun(
             run_id=run_id,
-            created_at=datetime.utcnow().isoformat(),
+            created_at=datetime.now(timezone.utc).isoformat(),
             status="pending",
             total_companies=len(domains),
         )
 
-        with Session(self.engine) as session:
-            # Store batch metadata in a simple JSON file for now
-            # (in production, use a dedicated table)
-            batch_file = Path("runs") / f"batch_{run_id}.json"
-            batch_file.parent.mkdir(exist_ok=True)
-            batch_file.write_text(json.dumps(asdict(batch), indent=2))
+        # Store batch metadata in a simple JSON file
+        batch_file = Path("runs") / f"batch_{run_id}.json"
+        batch_file.parent.mkdir(exist_ok=True)
+        batch_file.write_text(json.dumps(asdict(batch), indent=2))
 
-            # Store company list
-            for domain in domains:
-                company_run = CompanyRun(run_id=run_id, domain=domain, status="pending")
-                # Store in runs/batch_{run_id}/companies.jsonl
-                companies_file = batch_file.parent / f"batch_{run_id}_companies.jsonl"
-                with companies_file.open("a") as f:
-                    f.write(json.dumps(asdict(company_run)) + "\n")
+        # Store company list
+        companies_file = batch_file.parent / f"batch_{run_id}_companies.jsonl"
+        for domain in domains:
+            company_run = CompanyRun(run_id=run_id, domain=domain, status="pending")
+            with companies_file.open("a") as f:
+                f.write(json.dumps(asdict(company_run)) + "\n")
 
         logger.info(f"Created batch {run_id} with {len(domains)} companies")
         return run_id
