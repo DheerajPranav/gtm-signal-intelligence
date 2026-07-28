@@ -6,7 +6,7 @@
 
 ## Context
 
-The Day-4 plan suggests LlamaIndex + Chroma + Voyage/OpenAI embeddings. Two forces
+The Day-4 plan suggests LlamaIndex + Chroma + Voyage embeddings. Two forces
 push against taking that verbatim: (1) the locked Approach A (notebook-first, prove
 primitives, **reject framework-max**) and the quality bar's demand that cost/latency
 be explicit and every stage unit-testable — LlamaIndex's abstractions obscure both;
@@ -18,7 +18,7 @@ be verifiable end-to-end without fabricating model output.
 Build the ingestion/retrieval layer directly on **Chroma (vectors) + rank_bm25
 (keyword) + a hand-written section chunker**, behind a **pluggable, key-aware
 embedder** whose default is a fitted, fully offline, deterministic **TF-IDF hashing**
-embedder; Voyage/OpenAI are used automatically when their key is set.
+embedder; Voyage is used automatically when the key is set.
 
 ## Consequences
 

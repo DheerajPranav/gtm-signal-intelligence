@@ -125,7 +125,7 @@ python -m venv .venv && .venv/bin/pip install -e ".[dev]"
   **BM25** keyword index, both persisted under `.index/` (git-ignored, rebuilt by
   `ingest`). `query()` supports `--mode vector | bm25 | hybrid`; hybrid fuses the
   two with Reciprocal Rank Fusion.
-- **Pluggable, key-aware embedder.** With `VOYAGE_API_KEY` or `OPENAI_API_KEY` set,
+- **Pluggable, key-aware embedder.** With `VOYAGE_API_KEY` set,
   ingestion uses real semantic embeddings. With no key it falls back to a fully
   **offline, deterministic TF-IDF hashing embedder** — a real (if lexical) embedding
   that needs no network and fabricates nothing, so the whole pipeline is verifiable
@@ -164,7 +164,6 @@ Northstar Analytics, its customers, leadership, analysts, and press quotes are *
 # .env file (required for live reranking + answer generation)
 ANTHROPIC_API_KEY=sk-...
 # VOYAGE_API_KEY=... (optional; defaults to offline TF-IDF)
-# OPENAI_API_KEY=... (optional; defaults to offline TF-IDF)
 ```
 
 ## Layout

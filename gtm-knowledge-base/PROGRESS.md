@@ -21,7 +21,7 @@ vector store + BM25, expose a `query()` that returns chunks (no LLM yet).
   `ingest`, `query`.
 - **Two indexes over the same chunks**: Chroma (cosine) + BM25, persisted to
   `.index/` (git-ignored). `query()` supports vector / bm25 / **hybrid (RRF)**.
-- **Pluggable key-aware embedder**: Voyage/OpenAI when a key is set; otherwise a
+- **Pluggable key-aware embedder**: Voyage when a key is set; otherwise a
   fitted **offline deterministic TF-IDF hashing embedder** (blake2b buckets, IDF
   downweighting of ubiquitous terms), persisted so queries embed in the same space.
 - Shared tokenizer with stopword removal + light plural folding, so vector and

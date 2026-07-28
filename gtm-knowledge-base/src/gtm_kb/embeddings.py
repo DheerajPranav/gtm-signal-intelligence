@@ -155,43 +155,10 @@ class VoyageEmbedder:
         return self._embed([text], "query")[0]
 
 
-class OpenAIEmbedder:
-    """OpenAI embeddings (used when OPENAI_API_KEY is set)."""
-
-    def __init__(self, model: str = "text-embedding-3-small", dim: int = 1536) -> None:
-        self.name = f"openai:{model}"
-        self.dim = dim
-        self.model = model
-
-    def _client(self):
-        try:
-            from openai import OpenAI  # noqa: PLC0415
-        except ImportError as e:  # pragma: no cover - only hit without the extra
-            raise RuntimeError(
-                "OPENAI_API_KEY is set but the 'openai' package is not installed. "
-                "Install with: pip install '.[openai]'"
-            ) from e
-        return OpenAI()
-
-    def _embed(self, texts: list[str]) -> np.ndarray:
-        resp = self._client().embeddings.create(model=self.model, input=texts)
-        return _l2_normalize(np.asarray([d.embedding for d in resp.data], dtype=np.float32))
-
-    def embed_documents(self, texts: list[str]) -> np.ndarray:
-        if not texts:
-            return np.zeros((0, self.dim), dtype=np.float32)
-        return self._embed(texts)
-
-    def embed_query(self, text: str) -> np.ndarray:
-        return self._embed([text])[0]
-
-
 def get_embedder() -> Embedder:
-    """Select an embedder from the environment. Voyage > OpenAI > offline TF-IDF."""
+    """Select an embedder from the environment. Voyage > offline TF-IDF."""
     if os.getenv("VOYAGE_API_KEY"):
         return VoyageEmbedder()
-    if os.getenv("OPENAI_API_KEY"):
-        return OpenAIEmbedder()
     return TfidfHashingEmbedder()
 
 

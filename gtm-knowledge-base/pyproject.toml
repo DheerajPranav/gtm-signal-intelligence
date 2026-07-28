@@ -15,7 +15,6 @@ dependencies = [
 [project.optional-dependencies]
 # Real embedding backends — used automatically when the matching API key is set.
 voyage = ["voyageai>=0.2"]
-openai = ["openai>=1.30"]
 dev = ["pytest>=8.0"]
 
 [project.scripts]

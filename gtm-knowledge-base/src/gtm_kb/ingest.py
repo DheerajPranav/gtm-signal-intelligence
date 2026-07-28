@@ -100,7 +100,7 @@ def main() -> None:
     print(f"  index dir:   {INDEX_DIR}")
     if is_offline(manifest["embedder"]):
         print("  note:        offline deterministic embedder (no API key found). "
-              "Set VOYAGE_API_KEY or OPENAI_API_KEY for semantic embeddings.")
+              "Set VOYAGE_API_KEY for semantic embeddings.")
 
 
 if __name__ == "__main__":
