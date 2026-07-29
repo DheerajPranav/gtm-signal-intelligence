@@ -207,6 +207,27 @@ async def _draft_variant(
     )
 
 
+def _select_angles_for_persona(persona: Persona) -> tuple[VariantAngle, ...]:
+    """Select angle variants based on persona role (Day 18 iteration: persona-aware).
+
+    VP/Executive titles benefit from strategic (pain-led) + social proof (peer-proof).
+    Operations departments respond to triggers (trigger-led) + pain.
+    Default: balanced three angles.
+    """
+    title_lower = (persona.title or "").lower()
+    dept_str = str(persona.department.value).lower() if persona.department else ""
+
+    if "vp" in title_lower or "chief" in title_lower or "cro" in title_lower:
+        # Executive: strategic impact + peer validation
+        return (VariantAngle.PAIN_LED, VariantAngle.PEER_PROOF, VariantAngle.TRIGGER_EVENT_LED)
+    elif "operations" in dept_str or "ops" in dept_str:
+        # Operations: triggers + pain, less peer proof
+        return (VariantAngle.TRIGGER_EVENT_LED, VariantAngle.PAIN_LED, VariantAngle.PEER_PROOF)
+    else:
+        # Default: balanced
+        return ANGLES
+
+
 async def draft_emails(
     profile: CompanyProfile,
     persona: Persona,
@@ -216,7 +237,7 @@ async def draft_emails(
     model: str = MODEL,
     semaphore: Optional[asyncio.Semaphore] = None,
 ) -> list[EmailDraft]:
-    """Draft the three angle variants for one persona, concurrently."""
+    """Draft angle variants for one persona, with persona-aware angle selection."""
     if peer_provider is None:
         peer_provider = KBPeerProofProvider()
     if client is None:
@@ -228,9 +249,12 @@ async def draft_emails(
 
     peer_text = peer_provider.get_case_study(profile).text
 
+    # Day 18 iteration: select angles based on persona role for higher quality
+    selected_angles = _select_angles_for_persona(persona)
+
     tasks = [
         _draft_variant(client, profile, persona, angle, peer_text, memory, semaphore, model)
-        for angle in ANGLES
+        for angle in selected_angles
     ]
     return list(await asyncio.gather(*tasks))
 

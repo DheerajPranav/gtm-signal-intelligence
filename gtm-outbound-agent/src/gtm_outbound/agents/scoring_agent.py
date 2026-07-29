@@ -22,15 +22,15 @@ from ..models import CompanyProfile, FitScore, Sourced
 MODEL = "claude-3-5-sonnet-20241022"
 MAX_TOKENS = 1024
 
-# Dimension weights for the overall score. Justified by the ICP itself: the behavioural
-# trigger ("hired a RevOps leader in the last 12 months") is called the strongest single
-# signal, and firmographics gate the whole motion, so those two carry the most weight.
-# Timing amplifies the behavioural trigger rather than standing alone, so it carries least.
+# Dimension weights for the overall score (Day 18 iteration: rebalanced for behavioral signal).
+# Northstar is a RevOps platform, so the behavioral trigger ("hired a RevOps leader",
+# "published RevOps job openings") is the PRIMARY signal. A Series A with a VP RevOps hire
+# should score higher than a Series D with no RevOps leadership. Rebalanced post-eval 1.
 WEIGHTS: dict[str, float] = {
-    "firmographic": 0.30,
-    "technographic": 0.25,
-    "behavioral": 0.30,
-    "timing": 0.15,
+    "firmographic": 0.20,      # Company size is baseline gate, not primary driver
+    "technographic": 0.15,     # Stack (Salesforce, Snowflake) is nice-to-have
+    "behavioral": 0.45,        # RevOps hiring + budget = primary signal (↑ from 0.30)
+    "timing": 0.20,            # Timing amplifies behavioral (↑ from 0.15)
 }
 assert abs(sum(WEIGHTS.values()) - 1.0) < 1e-9, "dimension weights must sum to 1"
 
