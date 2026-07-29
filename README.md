@@ -140,7 +140,9 @@ streamlit run examples/streamlit_app.py       # -> interactive rubric explorer
 
 ## Tech
 
-Python 3.11+ · Anthropic Claude (Sonnet default, Haiku for cheap extraction, Opus for hard reasoning) · Pydantic v2 · pytest. RAG/agent stack (embeddings, vector store, LlamaIndex, FastAPI/Streamlit, evals) lands in Weeks 1–4 as the milestones above ship.
+**Stack:** Python 3.10+ · **Groq** (Mixtral, primary) + Anthropic Claude (fallback) · Pydantic v2 · pytest · Streamlit · SQLite/Postgres · Chroma + BM25 · Langfuse (optional)
+
+**LLM Provider:** Groq (default, ~11× cheaper + ~50ms latency) with automatic Anthropic fallback. All modules support both APIs via unified provider abstraction (see [GROQ_MIGRATION.md](docs/GROQ_MIGRATION.md)).
 
 ---
 

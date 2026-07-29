@@ -1,10 +1,11 @@
 [project]
 name = "gtm-cli-warmup"
 version = "0.1.0"
-description = "Anthropic SDK warmup CLI with structured output and per-call cost tracking."
+description = "GTM CLI warmup: structured output + cost tracking with Groq/Anthropic SDK."
 requires-python = ">=3.11"
 dependencies = [
-    "anthropic>=0.70",
+    "groq>=0.4.0",  # PRIMARY: Fast extraction
+    "anthropic>=0.70",  # FALLBACK: Advanced reasoning
     "pydantic>=2.7",
     "python-dotenv>=1.0",
 ]

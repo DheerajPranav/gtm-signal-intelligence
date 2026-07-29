@@ -7,13 +7,14 @@ dependencies = [
     "chromadb>=0.5",
     "rank-bm25>=0.2.2",
     "numpy>=1.26",
-    "anthropic>=0.28",
+    "groq>=0.4.0",  # PRIMARY: LLM for reranking + answer generation
+    "anthropic>=0.28",  # FALLBACK: LLM inference
     "pydantic>=2.0",
     "streamlit>=1.28",
 ]
 
 [project.optional-dependencies]
-# Real embedding backends — used automatically when the matching API key is set.
+# Real embedding backends — used automatically when the matching API key is set
 voyage = ["voyageai>=0.2"]
 dev = ["pytest>=8.0"]
 
