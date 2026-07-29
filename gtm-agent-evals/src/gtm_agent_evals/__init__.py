@@ -7,6 +7,7 @@ from .rubrics import (
     PersonaRubric,
     EmailRubric,
     CritiqueRubric,
+    Seniority,
 )
 
 __version__ = "0.1.0"
@@ -15,4 +16,5 @@ __all__ = [
     "PersonaRubric",
     "EmailRubric",
     "CritiqueRubric",
+    "Seniority",
 ]

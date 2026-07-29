@@ -205,9 +205,91 @@ MIT License. Use these rubrics in your own GTM AI system, evals platform, or rev
 **Part of:** [gtm-signal-intelligence](https://github.com/DheerajPranav/gtm-signal-intelligence)  
 **Live repo:** Week 1-3 of a 4-week GTM AI engineering sprint  
 
+## Integration examples (Day 20)
+
+The package includes three production-ready integration examples:
+
+### 1. LangChain Integration
+
+Wrap rubrics as LangChain evaluators (framework-agnostic):
+
+```python
+from examples.langchain_integration import LangChainICPEvaluator
+
+evaluator = LangChainICPEvaluator()
+result = evaluator.evaluate({
+    "firmographic": 7.0,
+    "technographic": 6.0,
+    "behavioral": 9.0,
+    "timing": 6.0,
+})
+# → {"passed": True, "score": 7.55, ...}
+```
+
+**Includes:**
+- `LangChainICPEvaluator`: ICP scoring wrapper
+- `LangChainEmailEvaluator`: Email would-send decision
+- `LangChainPersonaEvaluator`: Persona completeness check
+
+### 2. External Dataset Evaluation Harness
+
+Test rubrics on external datasets without agent dependency:
+
+```python
+from examples.external_dataset_evals import ExternalDatasetEvaluator
+
+evaluator = ExternalDatasetEvaluator()
+result = evaluator.eval_icp_dataset("gold_companies.jsonl")
+# → {"rubric": "ICPRubric", "total": 100, "accuracy": 0.95, ...}
+
+# Generate markdown report
+report = evaluator.generate_report()
+```
+
+**Dataset formats (JSONL):**
+```json
+// ICP gold dataset
+{"company": "Acme", "dimensions": {...}, "expected_score": 7.5}
+
+// Email gold dataset
+{"email_id": "123", "scores": {...}, "expected_would_send": true}
+
+// Persona gold dataset
+{"persona_id": "123", "persona": {...}, "expected_complete": true}
+```
+
+### 3. Streamlit Interactive Explorer
+
+Visual rubric browser and scorer:
+
+```bash
+streamlit run examples/streamlit_app.py
+```
+
+**Features:**
+- View all rubrics and dimension weights
+- Interactive sliders to compute scores
+- Threshold checking for would-send decisions
+- Grounding terms by segment (fintech, devtools, etc.)
+- Copy-paste ready system prompts
+
+## Testing
+
+```bash
+# Test rubrics
+pytest tests/test_rubrics.py -v
+
+# Test integrations (requires examples in PYTHONPATH)
+PYTHONPATH=. pytest tests/test_integrations.py -v
+
+# All tests
+PYTHONPATH=. pytest tests/ -v
+# → 35 tests, all passing
+```
+
 ## Next: Framework integration
 
-- **LangChain integration:** Load rubrics as prompt templates
 - **LlamaIndex evals:** Use as custom eval metrics
 - **OpenAI Evals:** Adapt for OpenAI eval harness
+- **Hugging Face:** Integration with HF Evaluator API
 - **HubSpot plugin:** Score deals and leads live via HubSpot API
