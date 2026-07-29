@@ -1,0 +1,37 @@
+[project]
+name = "gtm-agent-evals"
+version = "0.1.0"
+description = "Open-source LLM-judge rubric kit for GTM AI agents. Reusable evaluation rubrics for ICP scoring, persona building, email writing, and critique."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [
+    { name = "Dheeraj Pranav", email = "krovvididheeraj@gmail.com" }
+]
+
+dependencies = [
+    "pydantic>=2.0",
+    "anthropic>=0.28",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "pytest-asyncio>=0.21",
+]
+
+[project.urls]
+Repository = "https://github.com/DheerajPranav/gtm-signal-intelligence/tree/main/gtm-agent-evals"
+Documentation = "https://github.com/DheerajPranav/gtm-signal-intelligence/tree/main/gtm-agent-evals/README.md"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/gtm_agent_evals"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
+asyncio_mode = "auto"
