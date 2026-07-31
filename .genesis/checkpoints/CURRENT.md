@@ -1,17 +1,17 @@
 # CURRENT
-- active_loop: L1 BUILD (exited through L4 VERIFY)
-- target: M13 Day 13 critique agent + Account Brief — complete
+- active_loop: idle — Days 1–20 complete, Days 21–28 (portfolio/blog/video/deploy) not started
+- target: Day 21 — README polish + Loom + LinkedIn ship (next milestone)
 - iteration: 1
-- last_gate: G4 QUALITY — 84 tests green in gtm-knowledge-base, 177 in gtm-outbound-agent (computed)
-- last_action: built Day 13 critique agent (5-dim skeptical rubric + memory-write decision), run_company pipeline, deterministic Account Brief, critique eval; +26 tests; mutation-verified would-send pass rate; also cleared the deferred Day-12 semaphore mutation check (passed)
-- next_action: Day 14 (publish KB blog post + mid-sprint check-in) — OR obtain ANTHROPIC_API_KEY and close out Day 7 + all live Day 9-13 metrics
-- deferred_verify: none — Day-12 semaphore mutation check completed 2026-07-26
-- known_gaps: per-call token cost not tracked (brief reports $0, real latency); Langfuse tagging unwired — both deferred to the observability pass
+- last_gate: G4 QUALITY — all four suites green, computed & verified 2026-07-31:
+  gtm-cli-warmup 14, gtm-knowledge-base 84, gtm-outbound-agent 214, gtm-agent-evals 35 = 347 tests
+- last_action: session 2026-07-31 — re-verified all test suites from cold pickup (347 green); created gtm-agent-evals venv; refreshed this checkpoint. Then started Day 21 content: wrote docs/DAY_21_SHIP.md (5-min Loom script + 2 LinkedIn posts + blog outline, all honestly framed — only [computed] numbers used); freshened stale flagship README status (177→214 tests, Days 14–20 status added)
+- next_action: Day 21 remaining — RECORD the Loom (needs screen capture) + PUBLISH the 2 LinkedIn posts (user action). Optionally: fuller landing-page rewrite of flagship README. Then Day 22 portfolio site. Live quality metrics + prod deploy still gated on an API key.
+- deferred_verify: none
+- known_gaps: live deployment (Day 7 + Day 20 deploy) never executed — needs API key; Loom/LinkedIn are drafts not shipped; per-call token cost not aggregated in observability; Langfuse tagging unwired
 - model: claude-opus-4-8
 - tokens_budget: 50000/milestone
 - skills_loaded: [genesis]
-- blockers: no ANTHROPIC_API_KEY → Day 7 deploy/Loom/post genuinely incomplete;
-  faithfulness + completeness judges implemented but unmeasured
+- blockers: no live API key on record → all "deploy/live" DoD items remain genuinely incomplete
 - open_decision: none
 
 ## Integrity incident (2026-07-24) — resolved

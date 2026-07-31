@@ -267,12 +267,23 @@ Open: live 9-email run + wall-clock need `ANTHROPIC_API_KEY`.
 
 ✅ **Complete (Day 13):** critique agent (5-dim skeptical rubric + memory-write decision),
 `run_company` pipeline chaining all five agents, deterministic Account Brief markdown,
-critique calibration eval. **177 tests.** Open: live `run_company` run + per-call cost
+critique calibration eval. Open: live `run_company` run + per-call cost
 tracking need `ANTHROPIC_API_KEY` + observability wiring.
 
-⏳ **Upcoming:**
-- Day 14: Publish KB blog post + mid-sprint check-in
-- Week 5–6: v2 learning loop (episodic/semantic/procedural memory, consolidation, ablation)
+✅ **Complete (Days 14–18):** Groq/Anthropic provider abstraction, batch mode (concurrent
+companies + failure isolation + checkpoint resume), Streamlit dashboard, full eval harness
+(enrichment / ICP / email quality / would-send), and a hypothesis-driven iteration cycle.
+
+✅ **Complete (Days 19–20):** `gtm-agent-evals` — framework-agnostic open-source rubric kit
+(ICP / Persona / Email / Critique) with LangChain + dataset + Streamlit examples.
+
+**Test count:** 214 hermetic tests in this package (347 across the whole monorepo), all
+offline. Every live *quality* metric still gates to `not measured` without an API key —
+see `evals/report.md`.
+
+⏳ **Upcoming (Days 21–28):** flagship README polish + Loom + LinkedIn ship, portfolio site,
+blog post, CV/LinkedIn overhaul, launch, and live production deploy (Modal + Streamlit Cloud
++ Neon) — the deploy step is the last thing gated on a live API key.
 
 📅 **Week 5-6 extension (v2 Learning Loop):**
 - Episodic + semantic + procedural memory layers
