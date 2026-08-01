@@ -1,13 +1,38 @@
-# GTM Signal Intelligence — Project Status (Through Day 13 + API Cleanup)
+# GTM Signal Intelligence — Project Status
 
-**Last updated:** 2026-07-29 | **Commit:** c73dbc4 (API cleanup)
+**Last updated:** 2026-08-01 | Live status table lives in the root [`README.md`](README.md).
+
+> **Note:** The detailed walkthrough below covers **Days 1–13** in depth. For the
+> current sprint state (Days 14–23) see the addendum immediately below, or the status
+> table in the root README, which is the canonical source of truth.
 
 ---
 
-## Executive Summary
+## Days 14–23 Addendum (current)
+
+**Days complete: 23/28.** All computed gates green — **347 hermetic tests** verified
+2026-07-31 (14 CLI + 84 KB + 214 outbound + 35 eval-kit). Live API spend: **$0.00**.
+
+| Days | Deliverable | Gate / artifact |
+|---|---|---|
+| 14–15 | Groq/Anthropic provider abstraction; batch mode (concurrent + failure isolation + resume) | tests green |
+| 16–17 | Streamlit dashboard v1; full eval harness (enrichment / ICP / email / would-send) | tests green |
+| 18 | Hypothesis-driven iteration cycle (4 mutations) | `docs/ITERATION_LOG.md` |
+| 19–20 | `gtm-agent-evals` open-source rubric kit + integrations | 35 tests |
+| 21 | Flagship ship content: Loom script + 2 LinkedIn posts + blog outline | `docs/DAY_21_SHIP.md` |
+| 22 | Portfolio site (Next.js 16 + Tailwind), build verified | `portfolio-site/`, `npm run build` |
+| 23 | Flagship blog post (full technical deep-dive) | `docs/FLAGSHIP_BLOG_POST.md` |
+
+**Honest gaps (unchanged):** live *quality* metrics (email quality, would-send rate, ICP
+Spearman) remain `not measured` without an API key; live deploys (Modal / Streamlit Cloud /
+Vercel) and Loom recording / LinkedIn publishing are user actions still pending.
+
+---
+
+## Executive Summary (Days 1–13 deep-dive)
 
 ✅ **All 13 days complete and tested**
-- 275 offline, deterministic tests across 3 modules
+- 275 offline, deterministic tests across 3 modules *(the suite has since grown to 347)*
 - Zero hallucinations: every claim grounded in the Northstar corpus
 - All critical gates passing: corpus integrity, retrieval, answer generation, agent orchestration, evals
 

@@ -36,11 +36,14 @@ A four-week (28-day) applied-AI engineering sprint building a portfolio of GTM (
 | 18 | Iteration cycle — 4 hypothesis-driven mutations, all metrics 0→passing | `ITERATION_LOG.md` + mutations | ✅ |
 | 19 | Open-source rubrics package — ICP, Persona, Email, Critique rubrics | `pytest -q` → 22 pass | ✅ |
 | 20 | Framework-agnostic integrations — LangChain wrappers, external datasets, Streamlit explorer | `pytest -q` → 35 pass | ✅ |
-| 21–28 | Portfolio, blog posts, Loom videos, LinkedIn, deployment to Streamlit Cloud | _tbd_ | ⏳ |
+| 21 | Flagship ship content — 5-min Loom script + 2 LinkedIn posts + blog outline; flagship README freshened | `docs/DAY_21_SHIP.md` | ✅ content drafted (Loom/posts are user actions) |
+| 22 | Portfolio site — Next.js 16 + Tailwind, hero/stats/projects/essay/contact, mobile-responsive | `npm run build` → passing | ✅ built (Vercel deploy = user action) |
+| 23 | Flagship blog post — full technical deep-dive on the 5-agent honest eval loop | `docs/FLAGSHIP_BLOG_POST.md` | ✅ written (publish = user action) |
+| 24–28 | CV + LinkedIn overhaul, eval-kit polish, launch, cold outreach, live prod deploy (Modal/Vercel/Neon) | _tbd_ | ⏳ |
 
-**Days Complete:** 20/28 ✅  
-**Status:** Production-ready through Day 20 (batch mode, dashboard, evals, open-source kit)  
-**Remaining:** Days 21–28 (portfolio, blog, video, deployment)
+**Days Complete:** 23/28 ✅ (Days 21–23 are content deliverables; publishing/deploying them are user actions)  
+**Status:** Production-ready through Day 20; ship content (Loom script, LinkedIn posts, blog post, portfolio site) drafted & built through Day 23  
+**Remaining:** Days 24–28 (CV/LinkedIn overhaul, launch content, live deployment) — the live-deploy steps are gated on an API key + the user's Vercel/hosting accounts
 
 ### Computed Gates Summary
 
@@ -88,7 +91,9 @@ gtm-signal-intelligence/
 │   ├── tests/              35 comprehensive tests (22 rubric + 13 integration)
 │   ├── README.md           usage + design principles
 │   └── CONTRIBUTING.md     guidelines for new rubrics/integrations
-├── docs/                   Progress docs (Days 1–20), architecture decisions, iteration logs
+├── portfolio-site/         Day 22 — Next.js 16 + Tailwind portfolio site (Vercel-ready)
+│   └── src/app/            hero · stats · featured projects · essay · contact
+├── docs/                   Progress docs (Days 1–23), ship content, architecture decisions, iteration logs
 ├── .genesis/               engineering spine — plan, milestones, decisions, context graph
 └── gtm_ai_sprint_master_plan.md   the full 4-week roadmap
 ```
@@ -129,6 +134,12 @@ PYTHONPATH=.:$PYTHONPATH python -m pytest -q  # -> 35 passed (22 rubric + 13 int
 python examples/langchain_integration.py      # -> ICP/Email/Persona evaluators
 python examples/external_dataset_evals.py     # -> gold dataset testing + report
 streamlit run examples/streamlit_app.py       # -> interactive rubric explorer
+
+# Day 22 — portfolio site (Next.js 16 + Tailwind)
+cd ../portfolio-site
+npm install
+npm run build                          # -> production build passes (static prerender)
+npm run dev                            # -> http://localhost:3000
 ```
 
 ## Highlights so far
