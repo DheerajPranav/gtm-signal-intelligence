@@ -52,6 +52,10 @@ class ICPRubric:
         "timing": 0.20,
     }
 
+    # Overall-score cutoffs for the 3-band classification. See docs/CALIBRATION.md
+    # for why these sit where they do (behavioral-weighted, Series B-D RevOps ICP).
+    BAND_CUTOFFS = {"strong": 6.5, "weak": 4.0}
+
     DIMENSION_DESCRIPTIONS = {
         "firmographic": (
             "Company size (headcount, ARR), growth stage (Series A-D), "
@@ -88,6 +92,15 @@ class ICPRubric:
             for dim, weight in ICPRubric.WEIGHTS.items()
         )
         return min(10.0, max(0.0, total))
+
+    @staticmethod
+    def band(overall: float) -> str:
+        """Map an overall score (0-10) to a 3-band label: strong / weak / none."""
+        if overall >= ICPRubric.BAND_CUTOFFS["strong"]:
+            return "strong"
+        if overall >= ICPRubric.BAND_CUTOFFS["weak"]:
+            return "weak"
+        return "none"
 
 
 @dataclass
@@ -228,6 +241,34 @@ class EmailRubric:
             },
         },
     }
+
+    # Dimensions where a higher score is worse (inverted gate).
+    _LOWER_IS_BETTER = ("spam_risk",)
+
+    @staticmethod
+    def evaluate_would_send(scores: dict) -> dict:
+        """Deterministic would-send decision from per-dimension scores.
+
+        Args:
+            scores: dict with keys personalization, relevance, cta, spam_risk (0-5).
+
+        Returns:
+            {"would_send": bool, "failures": list[str]} — a failure per gate not met.
+            Missing dimensions are treated as worst-case (0, or 5 for spam_risk) so an
+            incomplete input can never pass by omission.
+        """
+        criteria = EmailRubric.DIMENSIONS["would_send"]["pass_criteria"]
+        failures: list[str] = []
+        for dim, threshold in criteria.items():
+            if dim in EmailRubric._LOWER_IS_BETTER:
+                value = scores.get(dim, 5.0)
+                if value > threshold:
+                    failures.append(f"{dim} {value} > {threshold} (max)")
+            else:
+                value = scores.get(dim, 0.0)
+                if value < threshold:
+                    failures.append(f"{dim} {value} < {threshold} (min)")
+        return {"would_send": not failures, "failures": failures}
 
 
 class CritiqueRubric:

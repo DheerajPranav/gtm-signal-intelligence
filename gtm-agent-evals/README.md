@@ -1,8 +1,10 @@
 # gtm-agent-evals
 
-**Open-source LLM-judge rubric kit for GTM AI agents.**
+**The eval kit for GTM agents I wish existed when I started.**
 
-Reusable evaluation rubrics for scoring ICP fit, building buyer personas, evaluating cold email quality, and conducting skeptical email critique. Framework-agnostic — use these rubrics to evaluate any company profile, persona, or email, not just output from the [gtm-outbound-agent](../gtm-outbound-agent/).
+Open-source LLM-judge rubrics for scoring ICP fit, building buyer personas, evaluating cold email quality, and conducting skeptical email critique. Framework-agnostic — use these rubrics to evaluate any company profile, persona, or email, not just output from the [gtm-outbound-agent](../gtm-outbound-agent/).
+
+The LLM scores each dimension; the **pass/fail and overall numbers are computed in code** — so the gates are inspectable, testable, and adjustable without re-prompting. Every threshold and weight is documented in [`docs/CALIBRATION.md`](docs/CALIBRATION.md).
 
 ## Quick start
 
@@ -45,6 +47,34 @@ from gtm_agent_evals import CritiqueRubric
 should_send = CritiqueRubric.SHOULD_SEND_THRESHOLDS
 # → {"personalization": 3.5, "relevance": 3.5, "cta": 3.0, "spam_risk": 1.5}
 ```
+
+## Mini-eval runner
+
+A standalone, **deterministic** runner scores a JSONL file against a rubric — no LLM
+calls, so it's hermetic and identical every time. Use it to regression-test a scoring
+model's outputs, or to sanity-check the gates against the bundled good/bad fixtures.
+
+```bash
+python -m gtm_agent_evals list          # -> email_quality, icp, persona
+# or the installed console script:
+gtm-evals run --rubric email_quality --input-file examples/data/email_quality.jsonl
+```
+
+```
+Rubric: email_quality   (10 record(s))
+
+  good_funding_hook    → True     [failures=[]]  ✓
+  ...
+  bad_spammy_hype      → False    [failures=['spam_risk 4 > 1.5 (max)']]  ✓
+
+Agreement vs labels: 10/10 = 100%
+```
+
+Each rubric ships **5 passing / 5 failing** example records in
+[`examples/data/`](examples/data/) with `expected_*` labels, so the runner reports
+agreement and demonstrates that the gates actually separate good from bad. Input shapes and
+`--json` output are documented in the module docstring; the anchors are explained in
+[`docs/CALIBRATION.md`](docs/CALIBRATION.md).
 
 ## Four rubrics
 
@@ -194,7 +224,7 @@ response = client.messages.create(
 ```bash
 pip install -e ".[dev]"
 pytest tests/
-# → 30 tests, all passing
+# → rubric tests passing
 ```
 
 ## Open source
@@ -284,7 +314,7 @@ PYTHONPATH=. pytest tests/test_integrations.py -v
 
 # All tests
 PYTHONPATH=. pytest tests/ -v
-# → 35 tests, all passing
+# → 51 tests, all passing (22 rubric + 13 integration + 16 runner)
 ```
 
 ## Next: Framework integration

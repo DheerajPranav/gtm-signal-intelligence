@@ -1,0 +1,10 @@
+{"id": "strong_series_c_revops", "dimensions": {"firmographic": 7, "technographic": 6, "behavioral": 8, "timing": 7}, "expected_band": "strong"}
+{"id": "strong_vp_hire_funded", "dimensions": {"firmographic": 8, "technographic": 7, "behavioral": 9, "timing": 8}, "expected_band": "strong"}
+{"id": "strong_signals_heavy", "dimensions": {"firmographic": 6, "technographic": 6, "behavioral": 8, "timing": 7}, "expected_band": "strong"}
+{"id": "strong_mature_stack", "dimensions": {"firmographic": 7, "technographic": 8, "behavioral": 7, "timing": 6}, "expected_band": "strong"}
+{"id": "strong_big_firmo", "dimensions": {"firmographic": 9, "technographic": 5, "behavioral": 7, "timing": 8}, "expected_band": "strong"}
+{"id": "weak_flat_middle", "dimensions": {"firmographic": 5, "technographic": 5, "behavioral": 5, "timing": 5}, "expected_band": "weak"}
+{"id": "weak_low_behavioral", "dimensions": {"firmographic": 6, "technographic": 6, "behavioral": 4, "timing": 6}, "expected_band": "weak"}
+{"id": "weak_early_stage", "dimensions": {"firmographic": 4, "technographic": 4, "behavioral": 5, "timing": 4}, "expected_band": "weak"}
+{"id": "none_too_small", "dimensions": {"firmographic": 2, "technographic": 2, "behavioral": 2, "timing": 2}, "expected_band": "none"}
+{"id": "none_no_signals", "dimensions": {"firmographic": 3, "technographic": 2, "behavioral": 2, "timing": 3}, "expected_band": "none"}

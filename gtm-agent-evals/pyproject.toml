@@ -1,6 +1,6 @@
 [project]
 name = "gtm-agent-evals"
-version = "0.1.0"
+version = "0.2.0"
 description = "Open-source LLM-judge rubric kit for GTM AI agents. Reusable evaluation rubrics for ICP scoring, persona building, email writing, and critique."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -19,6 +19,9 @@ dev = [
     "pytest>=8.0",
     "pytest-asyncio>=0.21",
 ]
+
+[project.scripts]
+gtm-evals = "gtm_agent_evals.cli:main"
 
 [project.urls]
 Repository = "https://github.com/DheerajPranav/gtm-signal-intelligence/tree/main/gtm-agent-evals"

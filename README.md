@@ -40,11 +40,12 @@ A four-week (28-day) applied-AI engineering sprint building a portfolio of GTM (
 | 22 | Portfolio site — Next.js 16 + Tailwind, hero/stats/projects/essay/contact, mobile-responsive | **live** → [dheerajpranav.github.io/gtm-signal-intelligence](https://dheerajpranav.github.io/gtm-signal-intelligence/) | ✅ deployed (GitHub Pages) |
 | 23 | Flagship blog post — full technical deep-dive on the 5-agent honest eval loop | `docs/FLAGSHIP_BLOG_POST.md` | ✅ written (publish = user action) |
 | 24 | CV (one-page PDF, honest metrics) + LinkedIn overhaul copy; CV linked from portfolio | `portfolio-site/public/cv.pdf` + `npm run build` | ✅ built (profile edit = user action) |
-| 25–28 | Eval-kit polish, launch, cold outreach, live prod deploy (Modal/Vercel/Neon) | _tbd_ | ⏳ |
+| 25 | Eval-kit differentiator — deterministic mini-eval CLI, good/bad fixtures, calibration notes | `pytest -q` → 51 pass; `gtm-evals run …` | ✅ |
+| 26–28 | Eval-kit comparison notebook + launch (Twitter thread), cold outreach, live prod deploy (Modal/Neon) | _tbd_ | ⏳ |
 
-**Days Complete:** 24/28 ✅ (Days 21–24 are content deliverables; publishing/deploying them are user actions)  
-**Status:** Production-ready through Day 20; ship content (Loom script, LinkedIn posts, blog post, portfolio site, CV) drafted & built through Day 24  
-**Remaining:** Days 25–28 (eval-kit polish, launch content, live deployment) — the live-deploy steps are gated on an API key + the user's Vercel/hosting accounts
+**Days Complete:** 25/28 ✅ (portfolio is live; remaining publish/deploy steps are user actions)  
+**Status:** Production-ready through Day 20; ship content + portfolio (live on GitHub Pages) + eval-kit runner through Day 25  
+**Remaining:** Days 26–28 (launch content, cold outreach, live backend deploy) — the live-deploy steps are gated on an API key + the user's hosting accounts
 
 ### Computed Gates Summary
 
@@ -55,8 +56,8 @@ A four-week (28-day) applied-AI engineering sprint building a portfolio of GTM (
 | Outbound agent (Days 8–13) | 177 | 100% | ✅ |
 | Batch mode (Day 15) | 13 | 100% | ✅ |
 | Eval harness (Day 17) | 24 | 100% | ✅ |
-| Open-source rubrics (Days 19–20) | 35 | 100% | ✅ |
-| **TOTAL** | **347** | **100%** | **✅** |
+| Eval kit — rubrics + integrations + runner (Days 19–20, 25) | 51 | 100% | ✅ |
+| **TOTAL** | **363** | **100%** | **✅** |
 
 **API spend to date:** `$0.00`. Every gate is verified offline — deterministic
 embeddings and injected fake LLM clients. All capability shipping gates pass before any live API call.
@@ -131,7 +132,8 @@ streamlit run dashboard.py             # -> live run monitoring + cost dashboard
 # Days 19–20 — open-source eval rubrics package (framework-agnostic)
 cd ../gtm-agent-evals
 python -m venv .venv && .venv/bin/pip install -e ".[dev]"
-PYTHONPATH=.:$PYTHONPATH python -m pytest -q  # -> 35 passed (22 rubric + 13 integration)
+PYTHONPATH=.:$PYTHONPATH python -m pytest -q  # -> 51 passed (22 rubric + 13 integration + 16 runner)
+python -m gtm_agent_evals run --rubric email_quality --input-file examples/data/email_quality.jsonl  # -> 10/10 agreement
 python examples/langchain_integration.py      # -> ICP/Email/Persona evaluators
 python examples/external_dataset_evals.py     # -> gold dataset testing + report
 streamlit run examples/streamlit_app.py       # -> interactive rubric explorer

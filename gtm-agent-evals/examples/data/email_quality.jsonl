@@ -1,0 +1,10 @@
+{"id": "good_funding_hook", "scores": {"personalization": 5, "relevance": 4.5, "cta": 4, "spam_risk": 1}, "expected_would_send": true}
+{"id": "good_role_pain", "scores": {"personalization": 4, "relevance": 4, "cta": 3.5, "spam_risk": 1}, "expected_would_send": true}
+{"id": "good_peer_proof", "scores": {"personalization": 4.5, "relevance": 5, "cta": 4.5, "spam_risk": 0}, "expected_would_send": true}
+{"id": "good_at_thresholds", "scores": {"personalization": 3.5, "relevance": 3.5, "cta": 3, "spam_risk": 1.5}, "expected_would_send": true}
+{"id": "good_tight_ask", "scores": {"personalization": 5, "relevance": 4, "cta": 3.5, "spam_risk": 1}, "expected_would_send": true}
+{"id": "bad_generic_template", "scores": {"personalization": 2, "relevance": 4, "cta": 4, "spam_risk": 1}, "expected_would_send": false}
+{"id": "bad_wrong_persona", "scores": {"personalization": 4, "relevance": 2, "cta": 4, "spam_risk": 1}, "expected_would_send": false}
+{"id": "bad_no_ask", "scores": {"personalization": 4, "relevance": 4, "cta": 1, "spam_risk": 1}, "expected_would_send": false}
+{"id": "bad_spammy_hype", "scores": {"personalization": 4, "relevance": 4, "cta": 4, "spam_risk": 4}, "expected_would_send": false}
+{"id": "bad_pure_blast", "scores": {"personalization": 1, "relevance": 1, "cta": 1, "spam_risk": 5}, "expected_would_send": false}
