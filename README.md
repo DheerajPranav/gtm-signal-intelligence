@@ -39,11 +39,12 @@ A four-week (28-day) applied-AI engineering sprint building a portfolio of GTM (
 | 21 | Flagship ship content — 5-min Loom script + 2 LinkedIn posts + blog outline; flagship README freshened | `docs/DAY_21_SHIP.md` | ✅ content drafted (Loom/posts are user actions) |
 | 22 | Portfolio site — Next.js 16 + Tailwind, hero/stats/projects/essay/contact, mobile-responsive | `npm run build` → passing | ✅ built (Vercel deploy = user action) |
 | 23 | Flagship blog post — full technical deep-dive on the 5-agent honest eval loop | `docs/FLAGSHIP_BLOG_POST.md` | ✅ written (publish = user action) |
-| 24–28 | CV + LinkedIn overhaul, eval-kit polish, launch, cold outreach, live prod deploy (Modal/Vercel/Neon) | _tbd_ | ⏳ |
+| 24 | CV (one-page PDF, honest metrics) + LinkedIn overhaul copy; CV linked from portfolio | `portfolio-site/public/cv.pdf` + `npm run build` | ✅ built (profile edit = user action) |
+| 25–28 | Eval-kit polish, launch, cold outreach, live prod deploy (Modal/Vercel/Neon) | _tbd_ | ⏳ |
 
-**Days Complete:** 23/28 ✅ (Days 21–23 are content deliverables; publishing/deploying them are user actions)  
-**Status:** Production-ready through Day 20; ship content (Loom script, LinkedIn posts, blog post, portfolio site) drafted & built through Day 23  
-**Remaining:** Days 24–28 (CV/LinkedIn overhaul, launch content, live deployment) — the live-deploy steps are gated on an API key + the user's Vercel/hosting accounts
+**Days Complete:** 24/28 ✅ (Days 21–24 are content deliverables; publishing/deploying them are user actions)  
+**Status:** Production-ready through Day 20; ship content (Loom script, LinkedIn posts, blog post, portfolio site, CV) drafted & built through Day 24  
+**Remaining:** Days 25–28 (eval-kit polish, launch content, live deployment) — the live-deploy steps are gated on an API key + the user's Vercel/hosting accounts
 
 ### Computed Gates Summary
 

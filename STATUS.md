@@ -10,8 +10,9 @@
 
 ## Days 14–23 Addendum (current)
 
-**Days complete: 23/28.** All computed gates green — **347 hermetic tests** verified
+**Days complete: 24/28.** All computed gates green — **347 hermetic tests** verified
 2026-07-31 (14 CLI + 84 KB + 214 outbound + 35 eval-kit). Live API spend: **$0.00**.
+Portfolio site build passes; CV renders as a one-page PDF.
 
 | Days | Deliverable | Gate / artifact |
 |---|---|---|
@@ -22,6 +23,7 @@
 | 21 | Flagship ship content: Loom script + 2 LinkedIn posts + blog outline | `docs/DAY_21_SHIP.md` |
 | 22 | Portfolio site (Next.js 16 + Tailwind), build verified | `portfolio-site/`, `npm run build` |
 | 23 | Flagship blog post (full technical deep-dive) | `docs/FLAGSHIP_BLOG_POST.md` |
+| 24 | One-page CV (PDF, honest metrics) + LinkedIn overhaul copy; CV linked from portfolio | `portfolio-site/public/cv.pdf`, `docs/DAY_24_LINKEDIN.md` |
 
 **Honest gaps (unchanged):** live *quality* metrics (email quality, would-send rate, ICP
 Spearman) remain `not measured` without an API key; live deploys (Modal / Streamlit Cloud /

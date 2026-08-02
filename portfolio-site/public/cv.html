@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Dheeraj Pranav — CV</title>
+<style>
+  :root { --ink:#18181b; --muted:#52525b; --line:#e4e4e7; --accent:#047857; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    color: var(--ink); font-size: 10.5px; line-height: 1.5;
+    max-width: 760px; margin: 0 auto; padding: 40px 44px;
+  }
+  h1 { font-size: 24px; margin: 0; letter-spacing: -0.02em; }
+  .title { color: var(--accent); font-weight: 600; font-size: 12px; margin-top: 2px; }
+  .contact { color: var(--muted); font-size: 9.5px; margin-top: 6px; }
+  .contact a { color: var(--muted); text-decoration: none; }
+  h2 {
+    font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em;
+    color: var(--accent); margin: 18px 0 7px; padding-bottom: 3px;
+    border-bottom: 1px solid var(--line);
+  }
+  p { margin: 0 0 6px; }
+  .summary { color: var(--muted); }
+  .role { display: flex; justify-content: space-between; align-items: baseline; margin-top: 8px; }
+  .role b { font-size: 11px; }
+  .role .when { color: var(--muted); font-size: 9.5px; white-space: nowrap; }
+  ul { margin: 4px 0 0; padding-left: 15px; }
+  li { margin-bottom: 3px; }
+  .metric { color: var(--accent); font-weight: 600; }
+  .skills { display: grid; grid-template-columns: 120px 1fr; gap: 3px 12px; }
+  .skills dt { color: var(--muted); font-weight: 600; }
+  .skills dd { margin: 0; }
+  .placeholder { color: #a1a1aa; font-style: italic; }
+  @page { size: letter; margin: 0; }
+  @media print { body { padding: 34px 44px; } }
+</style>
+</head>
+<body>
+  <header>
+    <h1>Dheeraj Pranav</h1>
+    <div class="title">GTM AI Engineer — building auditable, evaluated agents</div>
+    <div class="contact">
+      krovvididheeraj@gmail.com &nbsp;·&nbsp;
+      <a href="https://github.com/DheerajPranav">github.com/DheerajPranav</a> &nbsp;·&nbsp;
+      <a href="https://www.linkedin.com/in/dheerajpranav">linkedin.com/in/dheerajpranav</a>
+    </div>
+  </header>
+
+  <section>
+    <h2>Summary</h2>
+    <p class="summary">
+      Applied-AI engineer focused on GTM (go-to-market) systems where correctness is
+      provable, not asserted. I build agents whose every claim is source-grounded, whose
+      capabilities ship behind computed evaluation gates, and that report
+      <em>“not measured”</em> rather than a fabricated number. Deep on retrieval, multi-agent
+      orchestration, structured output, and the evals that keep them honest.
+    </p>
+  </section>
+
+  <section>
+    <h2>GTM AI Portfolio Sprint — self-directed (4 weeks)</h2>
+    <div class="role"><b>Applied-AI Engineering Sprint</b><span class="when">2026</span></div>
+    <p class="summary" style="margin-top:3px">
+      A monorepo of four GTM AI capabilities built against one fixed, internally-consistent
+      fictional world, so every generated claim is groundable and every capability is measured.
+      <span class="metric">347 hermetic tests · $0.00 live API spend</span> (every gate verified offline).
+    </p>
+    <ul>
+      <li>
+        <b>GTM Outbound Agent (flagship).</b> Built a five-agent pipeline
+        (research → score → persona → write → critique) that returns
+        <b>source-grounded</b> company profiles (every field carries its URL, with a
+        deterministic check that fails fabricated provenance), scores ICP fit with a
+        weighted mean computed in code, and drafts personalized emails via async fan-out
+        under one shared semaphore — graded by a deliberately skeptical LLM judge.
+        <span class="metric">214 hermetic tests; deterministic Account Brief.</span>
+      </li>
+      <li>
+        <b>GTM Knowledge Base.</b> Built a hybrid-retrieval RAG assistant (BM25 + vector
+        via Reciprocal Rank Fusion, reranker, cited answers) over a 30-doc corpus with a
+        35-question golden eval set.
+        <span class="metric">Computed baseline: 74% hit rate@5, 61% recall@5; 84 tests.</span>
+      </li>
+      <li>
+        <b>GTM Agent Evals.</b> Packaged a framework-agnostic, MIT-licensed LLM-judge
+        rubric kit (ICP / Persona / Email / Critique) with deterministic gates and
+        LangChain, external-dataset, and Streamlit integrations.
+        <span class="metric">35 tests; zero framework coupling.</span>
+      </li>
+    </ul>
+    <p class="summary" style="margin-top:6px">
+      Also shipped: batch mode (concurrent processing, failure isolation, checkpoint resume),
+      a Streamlit monitoring dashboard, a Groq/Anthropic provider abstraction, and a
+      hypothesis-driven iteration cycle. Portfolio site + repo:
+      <a href="https://github.com/DheerajPranav/gtm-signal-intelligence">github.com/DheerajPranav/gtm-signal-intelligence</a>.
+    </p>
+  </section>
+
+  <section>
+    <h2>Technical Skills</h2>
+    <dl class="skills">
+      <dt>Languages</dt><dd>Python 3.10+, TypeScript</dd>
+      <dt>LLM / Agents</dt><dd>Anthropic Claude, Groq; tool use, multi-agent orchestration, async fan-out, prompt-injection defense</dd>
+      <dt>RAG</dt><dd>Chroma, BM25, Reciprocal Rank Fusion, rerankers, citation extraction</dd>
+      <dt>Evaluation</dt><dd>golden sets, LLM-as-judge, deterministic gates, mutation testing, Spearman/MAE metrics</dd>
+      <dt>Data / Backend</dt><dd>Pydantic v2, SQLite/Postgres, Alembic, FastAPI patterns</dd>
+      <dt>Frontend / Ship</dt><dd>Streamlit, Next.js, Tailwind; Vercel, Modal (target)</dd>
+      <dt>Observability</dt><dd>Langfuse, per-call cost/latency/token tracking</dd>
+    </dl>
+  </section>
+
+  <section>
+    <h2>Experience</h2>
+    <p class="placeholder">[Add your prior roles here — company, title, dates, 2–3 impact bullets each.]</p>
+  </section>
+
+  <section>
+    <h2>Education</h2>
+    <p class="placeholder">[Add your degree, institution, and year.]</p>
+  </section>
+</body>
+</html>

@@ -6,6 +6,7 @@ const LINKS = {
   repo: "https://github.com/DheerajPranav/gtm-signal-intelligence",
   linkedin: "https://www.linkedin.com/in/dheerajpranav", // TODO: confirm exact vanity URL
   email: "krovvididheeraj@gmail.com",
+  cv: "/cv.pdf",
 };
 
 type Project = {
@@ -89,6 +90,7 @@ const ICONS = {
   linkedin:
     "M20.5 2h-17A1.5 1.5 0 0 0 2 3.5v17A1.5 1.5 0 0 0 3.5 22h17a1.5 1.5 0 0 0 1.5-1.5v-17A1.5 1.5 0 0 0 20.5 2zM8 19H5V9h3v10zM6.5 7.7a1.7 1.7 0 1 1 0-3.4 1.7 1.7 0 0 1 0 3.4zM19 19h-3v-5.3c0-1.3-.5-2.1-1.6-2.1-.9 0-1.4.6-1.6 1.2-.1.2-.1.5-.1.8V19h-3V9h3v1.4a3 3 0 0 1 2.7-1.5c2 0 3.4 1.3 3.4 4.1V19z",
   mail: "M20 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2zm0 4-8 5-8-5V6l8 5 8-5v2z",
+  doc: "M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm0 2 4.5 4.5H14V4zM8 13h8v1.5H8V13zm0 3h8v1.5H8V16zm0-6h4v1.5H8V10z",
 };
 
 export default function Home() {
@@ -125,6 +127,12 @@ export default function Home() {
             className="inline-flex items-center gap-2 rounded-full border border-black/15 px-5 py-2.5 text-sm font-medium transition hover:bg-black/5 dark:border-white/20 dark:hover:bg-white/10"
           >
             <Icon path={ICONS.mail} /> Email
+          </a>
+          <a
+            href={LINKS.cv}
+            className="inline-flex items-center gap-2 rounded-full border border-black/15 px-5 py-2.5 text-sm font-medium transition hover:bg-black/5 dark:border-white/20 dark:hover:bg-white/10"
+          >
+            <Icon path={ICONS.doc} /> Résumé
           </a>
         </div>
       </section>
