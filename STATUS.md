@@ -21,7 +21,7 @@ Portfolio site build passes; CV renders as a one-page PDF.
 | 18 | Hypothesis-driven iteration cycle (4 mutations) | `docs/ITERATION_LOG.md` |
 | 19–20 | `gtm-agent-evals` open-source rubric kit + integrations | 35 tests |
 | 21 | Flagship ship content: Loom script + 2 LinkedIn posts + blog outline | `docs/DAY_21_SHIP.md` |
-| 22 | Portfolio site (Next.js 16 + Tailwind), build verified | `portfolio-site/`, `npm run build` |
+| 22 | Portfolio site (Next.js 16 + Tailwind) — **live** at dheerajpranav.github.io/gtm-signal-intelligence | GitHub Pages (gh-pages branch) |
 | 23 | Flagship blog post (full technical deep-dive) | `docs/FLAGSHIP_BLOG_POST.md` |
 | 24 | One-page CV (PDF, honest metrics) + LinkedIn overhaul copy; CV linked from portfolio | `portfolio-site/public/cv.pdf`, `docs/DAY_24_LINKEDIN.md` |
 

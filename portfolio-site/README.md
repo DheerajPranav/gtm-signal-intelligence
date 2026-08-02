@@ -1,5 +1,7 @@
 # Portfolio Site — Dheeraj Pranav
 
+**Live:** https://dheerajpranav.github.io/gtm-signal-intelligence/
+
 A single-page portfolio for the GTM AI engineering sprint, built with **Next.js 16
 (App Router) + Tailwind v4 + TypeScript**. Statically prerendered — no server, no
 database, no API keys. Fully mobile-responsive and dark-mode aware.
@@ -20,19 +22,31 @@ npm run dev      # http://localhost:3000
 npm run build    # production build (verified passing)
 ```
 
-## Deploy to Vercel
+## Deploy — GitHub Pages (current)
 
-The repo is a monorepo, so point Vercel at this subdirectory:
+Configured for static export as a **project page**, served under
+`/gtm-signal-intelligence/` (see `next.config.ts`: `output: "export"` + `basePath`).
+To redeploy after changing the site:
 
-1. Import `github.com/DheerajPranav/gtm-signal-intelligence` in Vercel.
-2. Set **Root Directory** = `portfolio-site`.
-3. Framework preset auto-detects **Next.js**; no env vars needed.
-4. Deploy → attach a custom domain if desired.
+```bash
+npm run build                     # -> ./out (static export, assets prefixed with basePath)
+touch out/.nojekyll               # so Pages serves the _next/ folder
+cd out && git init -q && git checkout -b gh-pages && git add -A \
+  && git -c user.name="Dheeraj Pranav" -c user.email="krovvididheeraj@gmail.com" \
+     commit -qm "deploy" \
+  && git push -f https://github.com/DheerajPranav/gtm-signal-intelligence.git gh-pages
+```
 
-## Before publishing
+Pages is enabled from the `gh-pages` branch (root). First build takes ~1 min.
 
-- **Confirm the LinkedIn URL** in `src/app/page.tsx` (`LINKS.linkedin` is a `// TODO` placeholder).
-- Optional: add `public/cv.pdf` and a screenshot/GIF of the dashboard per the sprint plan.
+**Alternative — Vercel:** import the repo, set **Root Directory** = `portfolio-site`
+(remove the `basePath` first, since Vercel serves at the domain root).
+
+## Before sharing widely
+
+- **Confirm the LinkedIn URL** in `src/app/page.tsx` (`LINKS.linkedin` is a `// TODO` placeholder), then redeploy.
+- **Fill the CV placeholders** — Experience + Education in `public/cv.html`, regenerate `cv.pdf` (headless Chrome `--print-to-pdf`), and redeploy.
+- Optional: add a screenshot/GIF of the dashboard.
 
 All content numbers are computed from the actual test suites and eval artifacts — no live
 quality metric is claimed, matching the sprint's honesty rule.

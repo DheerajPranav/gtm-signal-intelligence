@@ -37,7 +37,7 @@ A four-week (28-day) applied-AI engineering sprint building a portfolio of GTM (
 | 19 | Open-source rubrics package — ICP, Persona, Email, Critique rubrics | `pytest -q` → 22 pass | ✅ |
 | 20 | Framework-agnostic integrations — LangChain wrappers, external datasets, Streamlit explorer | `pytest -q` → 35 pass | ✅ |
 | 21 | Flagship ship content — 5-min Loom script + 2 LinkedIn posts + blog outline; flagship README freshened | `docs/DAY_21_SHIP.md` | ✅ content drafted (Loom/posts are user actions) |
-| 22 | Portfolio site — Next.js 16 + Tailwind, hero/stats/projects/essay/contact, mobile-responsive | `npm run build` → passing | ✅ built (Vercel deploy = user action) |
+| 22 | Portfolio site — Next.js 16 + Tailwind, hero/stats/projects/essay/contact, mobile-responsive | **live** → [dheerajpranav.github.io/gtm-signal-intelligence](https://dheerajpranav.github.io/gtm-signal-intelligence/) | ✅ deployed (GitHub Pages) |
 | 23 | Flagship blog post — full technical deep-dive on the 5-agent honest eval loop | `docs/FLAGSHIP_BLOG_POST.md` | ✅ written (publish = user action) |
 | 24 | CV (one-page PDF, honest metrics) + LinkedIn overhaul copy; CV linked from portfolio | `portfolio-site/public/cv.pdf` + `npm run build` | ✅ built (profile edit = user action) |
 | 25–28 | Eval-kit polish, launch, cold outreach, live prod deploy (Modal/Vercel/Neon) | _tbd_ | ⏳ |

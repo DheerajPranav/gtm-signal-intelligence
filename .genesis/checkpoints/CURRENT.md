@@ -7,7 +7,7 @@
 - last_action: session 2026-07-31 — re-verified all test suites from cold pickup (347 green); created gtm-agent-evals venv; refreshed this checkpoint. Then started Day 21 content: wrote docs/DAY_21_SHIP.md (5-min Loom script + 2 LinkedIn posts + blog outline, all honestly framed — only [computed] numbers used); freshened stale flagship README status (177→214 tests, Days 14–20 status added)
 - next_action: Days 21–24 content all done & committed. Day 24: one-page CV generated as portfolio-site/public/cv.pdf (via headless Chrome from cv.html; honest metrics, personal-history sections are marked placeholders), linked from the portfolio (Résumé button, build re-verified); LinkedIn overhaul copy in docs/DAY_24_LINKEDIN.md. All progress docs refreshed (README 24/28, STATUS addendum). USER actions pending: record Loom, publish 2 LinkedIn posts + blog, deploy portfolio to Vercel, confirm LinkedIn URL, fill CV Experience/Education placeholders. Next dev task: Day 25 (eval-kit polish — the differentiator package).
 - deferred_verify: none
-- known_gaps: live deployment (Day 7 + Day 20 deploy) never executed — needs API key; Loom/LinkedIn are drafts not shipped; per-call token cost not aggregated in observability; Langfuse tagging unwired
+- known_gaps: PORTFOLIO now LIVE on GitHub Pages (https://dheerajpranav.github.io/gtm-signal-intelligence/, gh-pages branch, redeploy steps in portfolio-site/README). Still gated on API key: flagship live quality metrics + backend deploy (Modal). Loom/LinkedIn/blog are drafts not yet published; CV Experience/Education are placeholders; per-call token cost not aggregated; Langfuse tagging unwired
 - model: claude-opus-4-8
 - tokens_budget: 50000/milestone
 - skills_loaded: [genesis]
