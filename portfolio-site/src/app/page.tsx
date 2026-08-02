@@ -6,7 +6,7 @@ const LINKS = {
   repo: "https://github.com/DheerajPranav/gtm-signal-intelligence",
   linkedin: "https://www.linkedin.com/in/dheerajpranav", // TODO: confirm exact vanity URL
   email: "krovvididheeraj@gmail.com",
-  cv: "/cv.pdf",
+  cv: "cv.pdf", // relative so it resolves under the GitHub Pages basePath too
 };
 
 type Project = {
