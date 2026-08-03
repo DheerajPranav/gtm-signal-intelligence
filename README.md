@@ -42,9 +42,9 @@ A four-week (28-day) applied-AI engineering sprint building a portfolio of GTM (
 | 24 | CV (one-page PDF, honest metrics) + LinkedIn overhaul copy; CV linked from portfolio | `portfolio-site/public/cv.pdf` + `npm run build` | ✅ built (profile edit = user action) |
 | 25 | Eval-kit differentiator — deterministic mini-eval CLI, good/bad fixtures, calibration notes | `pytest -q` → 51 pass; `gtm-evals run …` | ✅ |
 | 26 | Eval-kit polish — great-vs-templated comparison notebook (rubric separates 5/5 vs 0/5) + Twitter launch thread | `pytest -q` → 55 pass; `docs/launch/twitter-thread.md` | ✅ |
-| 27–28 | Launch (post thread + LinkedIn), cold outreach, live prod deploy (Modal/Neon backend) | _tbd_ | ⏳ |
+| 27–28 | Launch + cold outreach + live prod deploy | drafts ready: `docs/launch/LAUNCH_CHECKLIST.md`, `docs/DEPLOY.md`, Modal config | 🧩 materials drafted; execution = user actions |
 
-**Days Complete:** 26/28 ✅ (portfolio is live; remaining publish/deploy steps are user actions)  
+**Days Complete:** 26/28 ✅ (portfolio is live; Days 27–28 materials are drafted — posting/outreach/live-deploy are user actions)  
 **Status:** Production-ready through Day 20; ship content + portfolio (live on GitHub Pages) + eval-kit runner & comparison through Day 26  
 **Remaining:** Days 27–28 (launch content, cold outreach, live backend deploy) — the live-deploy steps are gated on an API key + the user's hosting accounts
 

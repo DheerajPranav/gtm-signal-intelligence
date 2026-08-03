@@ -26,6 +26,7 @@ Portfolio site **live** on GitHub Pages; CV renders as a one-page PDF.
 | 24 | One-page CV (PDF, honest metrics) + LinkedIn overhaul copy; CV linked from portfolio | `portfolio-site/public/cv.pdf`, `docs/DAY_24_LINKEDIN.md` |
 | 25 | Eval-kit differentiator — deterministic mini-eval CLI (`gtm-evals run`), 5-good/5-bad fixtures per rubric, calibration notes | `gtm-agent-evals`: 51 tests, `docs/CALIBRATION.md` |
 | 26 | Eval-kit polish — great-vs-templated email comparison notebook (5/5 vs 0/5, spam-gap +2.1) + Twitter launch thread | 55 tests; `docs/launch/twitter-thread.md` |
+| 27–28 | Launch + deploy **materials drafted** — launch checklist (LinkedIn long-form, community posts, DM + cold-outreach templates, target tracker) + deploy config (Modal app, Neon, Streamlit) | `docs/launch/LAUNCH_CHECKLIST.md`, `docs/DEPLOY.md`, `gtm-outbound-agent/deploy/modal_app.py` |
 
 **Honest gaps (unchanged):** live *quality* metrics (email quality, would-send rate, ICP
 Spearman) remain `not measured` without an API key; live deploys (Modal / Streamlit Cloud /
