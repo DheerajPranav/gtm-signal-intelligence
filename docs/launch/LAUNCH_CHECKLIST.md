@@ -86,8 +86,8 @@ Use `docs/launch/outreach-tracker.csv`. Suggested buckets (from the sprint plan)
 - [ ] Log every send in the tracker (name, company, role, channel, sent date, status).
 
 ### 3. Retrospective (~1000 words, private)
-- [ ] Write: what worked, what didn't, what you'd do differently, what surprised you.
-- [ ] Suggested prompts: Was the fixed fictional corpus worth the 5 days? Where did the honesty rule cost time vs. save it? Which agent was hardest to evaluate? What would you cut?
+- [x] Draft written → `docs/launch/RETROSPECTIVE.md` (edit to taste; consider keeping private / moving to Substack).
+- [ ] Personalize + finalize before publishing anywhere.
 
 ### 4. Then rest.
 > Sleep. Tired code is bad code. — the plan
