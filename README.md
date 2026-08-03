@@ -41,11 +41,12 @@ A four-week (28-day) applied-AI engineering sprint building a portfolio of GTM (
 | 23 | Flagship blog post — full technical deep-dive on the 5-agent honest eval loop | `docs/FLAGSHIP_BLOG_POST.md` | ✅ written (publish = user action) |
 | 24 | CV (one-page PDF, honest metrics) + LinkedIn overhaul copy; CV linked from portfolio | `portfolio-site/public/cv.pdf` + `npm run build` | ✅ built (profile edit = user action) |
 | 25 | Eval-kit differentiator — deterministic mini-eval CLI, good/bad fixtures, calibration notes | `pytest -q` → 51 pass; `gtm-evals run …` | ✅ |
-| 26–28 | Eval-kit comparison notebook + launch (Twitter thread), cold outreach, live prod deploy (Modal/Neon) | _tbd_ | ⏳ |
+| 26 | Eval-kit polish — great-vs-templated comparison notebook (rubric separates 5/5 vs 0/5) + Twitter launch thread | `pytest -q` → 55 pass; `docs/launch/twitter-thread.md` | ✅ |
+| 27–28 | Launch (post thread + LinkedIn), cold outreach, live prod deploy (Modal/Neon backend) | _tbd_ | ⏳ |
 
-**Days Complete:** 25/28 ✅ (portfolio is live; remaining publish/deploy steps are user actions)  
-**Status:** Production-ready through Day 20; ship content + portfolio (live on GitHub Pages) + eval-kit runner through Day 25  
-**Remaining:** Days 26–28 (launch content, cold outreach, live backend deploy) — the live-deploy steps are gated on an API key + the user's hosting accounts
+**Days Complete:** 26/28 ✅ (portfolio is live; remaining publish/deploy steps are user actions)  
+**Status:** Production-ready through Day 20; ship content + portfolio (live on GitHub Pages) + eval-kit runner & comparison through Day 26  
+**Remaining:** Days 27–28 (launch content, cold outreach, live backend deploy) — the live-deploy steps are gated on an API key + the user's hosting accounts
 
 ### Computed Gates Summary
 
@@ -56,8 +57,8 @@ A four-week (28-day) applied-AI engineering sprint building a portfolio of GTM (
 | Outbound agent (Days 8–13) | 177 | 100% | ✅ |
 | Batch mode (Day 15) | 13 | 100% | ✅ |
 | Eval harness (Day 17) | 24 | 100% | ✅ |
-| Eval kit — rubrics + integrations + runner (Days 19–20, 25) | 51 | 100% | ✅ |
-| **TOTAL** | **363** | **100%** | **✅** |
+| Eval kit — rubrics + integrations + runner + comparison (Days 19–20, 25–26) | 55 | 100% | ✅ |
+| **TOTAL** | **367** | **100%** | **✅** |
 
 **API spend to date:** `$0.00`. Every gate is verified offline — deterministic
 embeddings and injected fake LLM clients. All capability shipping gates pass before any live API call.

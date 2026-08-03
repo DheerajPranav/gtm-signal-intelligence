@@ -53,6 +53,9 @@ class MyRubric:
 - [ ] No LLM calls in validation logic
 - [ ] Tests verify scoring guide coverage
 - [ ] Example usage in docstring
+- [ ] A `examples/data/<rubric>.jsonl` fixture with **5 passing + 5 failing** records (`expected_*` labels) so `python -m gtm_agent_evals run --rubric <name>` reports agreement
+- [ ] Calibration note in `docs/CALIBRATION.md` explaining any new weight/threshold/cutoff
+- [ ] If it's a gate the runner should expose, wire it into `RUBRICS` in `cli.py`
 
 ### Adding an Integration Example
 

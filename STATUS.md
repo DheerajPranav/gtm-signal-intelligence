@@ -10,8 +10,8 @@
 
 ## Days 14–23 Addendum (current)
 
-**Days complete: 25/28.** All computed gates green — **363 hermetic tests**
-(14 CLI + 84 KB + 214 outbound + 51 eval-kit). Live API spend: **$0.00**.
+**Days complete: 26/28.** All computed gates green — **367 hermetic tests**
+(14 CLI + 84 KB + 214 outbound + 55 eval-kit). Live API spend: **$0.00**.
 Portfolio site **live** on GitHub Pages; CV renders as a one-page PDF.
 
 | Days | Deliverable | Gate / artifact |
@@ -25,6 +25,7 @@ Portfolio site **live** on GitHub Pages; CV renders as a one-page PDF.
 | 23 | Flagship blog post (full technical deep-dive) | `docs/FLAGSHIP_BLOG_POST.md` |
 | 24 | One-page CV (PDF, honest metrics) + LinkedIn overhaul copy; CV linked from portfolio | `portfolio-site/public/cv.pdf`, `docs/DAY_24_LINKEDIN.md` |
 | 25 | Eval-kit differentiator — deterministic mini-eval CLI (`gtm-evals run`), 5-good/5-bad fixtures per rubric, calibration notes | `gtm-agent-evals`: 51 tests, `docs/CALIBRATION.md` |
+| 26 | Eval-kit polish — great-vs-templated email comparison notebook (5/5 vs 0/5, spam-gap +2.1) + Twitter launch thread | 55 tests; `docs/launch/twitter-thread.md` |
 
 **Honest gaps (unchanged):** live *quality* metrics (email quality, would-send rate, ICP
 Spearman) remain `not measured` without an API key; live deploys (Modal / Streamlit Cloud /

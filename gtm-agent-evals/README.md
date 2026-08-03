@@ -314,7 +314,7 @@ PYTHONPATH=. pytest tests/test_integrations.py -v
 
 # All tests
 PYTHONPATH=. pytest tests/ -v
-# → 51 tests, all passing (22 rubric + 13 integration + 16 runner)
+# → 55 tests, all passing (22 rubric + 13 integration + 16 runner + 4 comparison)
 ```
 
 ## Next: Framework integration
