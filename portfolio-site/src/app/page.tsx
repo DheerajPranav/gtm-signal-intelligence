@@ -65,7 +65,7 @@ const PROJECTS: Project[] = [
 ];
 
 const STATS = [
-  { value: "347", label: "hermetic tests" },
+  { value: "367", label: "hermetic tests" },
   { value: "$0.00", label: "live API spend to date" },
   { value: "4", label: "shipped capabilities" },
   { value: "0", label: "fabricated metrics" },
@@ -155,8 +155,8 @@ export default function Home() {
       <section className="mt-20">
         <h2 className="text-2xl font-bold tracking-tight">Featured work</h2>
         <p className="mt-2 text-black/60 dark:text-white/60">
-          A 4-week applied-AI sprint, built against one fixed fictional world so every
-          claim is groundable and every capability is measurable.
+          A GTM AI system built against one fixed fictional world, so every claim is
+          groundable and every capability is measurable.
         </p>
         <div className="mt-8 grid gap-6 sm:grid-cols-2">
           {PROJECTS.map((p) => (

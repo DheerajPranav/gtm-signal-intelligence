@@ -2,7 +2,7 @@
 
 **Live:** https://dheerajpranav.github.io/gtm-signal-intelligence/
 
-A single-page portfolio for the GTM AI engineering sprint, built with **Next.js 16
+A single-page portfolio for the GTM Signal Intelligence project, built with **Next.js 16
 (App Router) + Tailwind v4 + TypeScript**. Statically prerendered — no server, no
 database, no API keys. Fully mobile-responsive and dark-mode aware.
 
@@ -10,7 +10,7 @@ database, no API keys. Fully mobile-responsive and dark-mode aware.
 
 - **Hero** — name, one-liner ("GTM AI Engineer building auditable agents"), links to GitHub, LinkedIn, email.
 - **Stats** — 347 hermetic tests · $0.00 live spend · 4 capabilities · 0 fabricated metrics (all computed, honest numbers).
-- **Featured work** — the four sprint projects (Outbound Agent, Knowledge Base, Agent Evals, CLI Warmup), each linking to its subfolder in the monorepo.
+- **Featured work** — the four capabilities (Outbound Agent, Knowledge Base, Agent Evals, CLI Warmup), each linking to its subfolder in the monorepo.
 - **How I think about GTM AI** — short essay on grounding, computed gates, and `not measured` over fabrication.
 - **Contact** — email + LinkedIn CTA.
 
@@ -49,4 +49,4 @@ Pages is enabled from the `gh-pages` branch (root). First build takes ~1 min.
 - Optional: add a screenshot/GIF of the dashboard.
 
 All content numbers are computed from the actual test suites and eval artifacts — no live
-quality metric is claimed, matching the sprint's honesty rule.
+quality metric is claimed, matching the project's honesty rule.

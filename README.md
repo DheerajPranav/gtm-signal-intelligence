@@ -2,7 +2,7 @@
 
 > Turn raw GTM signals — company blurbs, lead bios, a knowledge base — into **structured, grounded, evaluated** revenue intelligence a RevOps/sales team could actually trust.
 
-A four-week (28-day) applied-AI engineering sprint building a portfolio of GTM (go-to-market) AI capabilities: structured extraction, retrieval-augmented generation, agents, and the evals that keep them honest. Everything is built against one fixed, internally-consistent world — the fictional company **Northstar Analytics** — so every generated claim can be grounded and every capability can be measured.
+**GTM Signal Intelligence** is a case study in building GTM (go-to-market) AI you can trust. It turns unstructured signals — company blurbs, lead bios, a knowledge base — into structured, grounded, evaluated revenue intelligence, across four capabilities: structured extraction, retrieval-augmented generation, a multi-agent outbound system, and an open-source evaluation kit. Everything is grounded in one fixed, internally-consistent world — the fictional company **Northstar Analytics** — so every generated claim can be sourced and every capability can be measured.
 
 ## Engineering bar (non-negotiable)
 
@@ -12,9 +12,24 @@ A four-week (28-day) applied-AI engineering sprint building a portfolio of GTM (
 - **No fabricated model output.** Where no API key is present, pipelines are verified end-to-end with deterministic mocks, and nothing invented is presented as a real model result.
 - **Honest data.** Northstar Analytics — its product, customers, leadership, metrics, and press — is entirely fictional and labelled as such throughout. No real person or company is represented.
 
-## Status
+## The system
 
-| Day | Deliverable | Computed gate | Status |
+Four capabilities, each shipped behind a **computed gate** — a test or check that passes or fails, not a narrated "looks good." **367 hermetic tests · $0.00 live API spend.**
+
+**1. Multi-agent outbound engine** — *the flagship.* Research → score → persona → write → critique, chained into a deterministic Account Brief. Sourced company profiles (every field carries its URL, with a deterministic check against fabricated provenance), an ICP score computed in code, async email fan-out under one shared semaphore, and a deliberately skeptical LLM judge. **214 tests.** → [`gtm-outbound-agent/`](gtm-outbound-agent/)
+
+**2. Hybrid-retrieval RAG knowledge base** — BM25 + vector retrieval via Reciprocal Rank Fusion, a reranker, and cited answers over a 30-doc internally-consistent corpus, with a 35-question golden eval set. **Computed baseline: 74% hit rate@5, 61% recall@5. 84 tests.** → [`gtm-knowledge-base/`](gtm-knowledge-base/)
+
+**3. Open-source evaluation kit** *(MIT)* — framework-agnostic ICP / persona / email / critique rubrics with deterministic gates and a CLI runner. On a 5-great-vs-5-templated email test, the would-send gate cleanly separates them **5/5 vs 0/5**. **55 tests.** → [`gtm-agent-evals/`](gtm-agent-evals/)
+
+**4. Structured-extraction primitives** — typed company/lead extraction via forced tool use (never string-parsing), recursively-closed strict schemas, real cost/latency/token logging from the first call. **14 tests.** → [`gtm-cli-warmup/`](gtm-cli-warmup/)
+
+**Live:** portfolio at [dheerajpranav.github.io/gtm-signal-intelligence](https://dheerajpranav.github.io/gtm-signal-intelligence/). **Deploy configs** (Modal backend · Neon · Streamlit dashboard) in [`docs/DEPLOY.md`](docs/DEPLOY.md). Live model-quality metrics render `not measured` until an API key is supplied — never a fabricated number.
+
+<details>
+<summary><b>Build log</b> — how it came together, step by step</summary>
+
+| # | Deliverable | Computed gate | Status |
 |----:|-------------|---------------|--------|
 | 1 | `describe` warmup CLI — structured company profile via forced tool use + cost logging | `pytest -q` → 6 pass | ✅ |
 | 2 | `extract_lead()` — typed `Lead` with per-field confidence + evidence | `pytest -q` → 14 pass | ✅ |
@@ -44,24 +59,22 @@ A four-week (28-day) applied-AI engineering sprint building a portfolio of GTM (
 | 26 | Eval-kit polish — great-vs-templated comparison notebook (rubric separates 5/5 vs 0/5) + Twitter launch thread | `pytest -q` → 55 pass; `docs/launch/twitter-thread.md` | ✅ |
 | 27–28 | Launch + cold outreach + live prod deploy | drafts ready: `docs/launch/LAUNCH_CHECKLIST.md`, `docs/DEPLOY.md`, Modal config | 🧩 materials drafted; execution = user actions |
 
-**Days Complete:** 26/28 ✅ (portfolio is live; Days 27–28 materials are drafted — posting/outreach/live-deploy are user actions)  
-**Status:** Production-ready through Day 20; ship content + portfolio (live on GitHub Pages) + eval-kit runner & comparison through Day 26  
-**Remaining:** Days 27–28 (launch content, cold outreach, live backend deploy) — the live-deploy steps are gated on an API key + the user's hosting accounts
+</details>
 
-### Computed Gates Summary
+**Where it stands:** all four capabilities are built, tested, and — for the portfolio — deployed. The remaining open items (recording a walkthrough, publishing write-ups, cold outreach, and the live backend deploy) need a live API key and outbound accounts; the drafts and configs are ready under [`docs/`](docs/).
 
-| Component | Tests | Pass Rate | Status |
-|-----------|-------|-----------|--------|
-| CLI warmup (Days 1–2) | 14 | 100% | ✅ |
-| RAG pipeline (Days 4–6) | 84 | 100% | ✅ |
-| Outbound agent (Days 8–13) | 177 | 100% | ✅ |
-| Batch mode (Day 15) | 13 | 100% | ✅ |
-| Eval harness (Day 17) | 24 | 100% | ✅ |
-| Eval kit — rubrics + integrations + runner + comparison (Days 19–20, 25–26) | 55 | 100% | ✅ |
-| **TOTAL** | **367** | **100%** | **✅** |
+### Results at a glance
 
-**API spend to date:** `$0.00`. Every gate is verified offline — deterministic
-embeddings and injected fake LLM clients. All capability shipping gates pass before any live API call.
+| Capability | Tests | Result |
+|------------|:-----:|--------|
+| Multi-agent outbound engine | 214 | source-grounded pipeline + deterministic Account Brief |
+| RAG knowledge base | 84 | 74% hit@5 · 61% recall@5 (35 golden questions) |
+| Evaluation kit | 55 | would-send gate separates 5/5 great vs 0/5 templated |
+| Extraction primitives | 14 | typed output via forced tool use |
+| **Total** | **367** | **100% passing · $0.00 live API spend** |
+
+Every gate is verified offline — deterministic embeddings and injected fake LLM clients — so
+all capability gates pass before any live API call, and unmeasured metrics render `not measured`.
 
 ### Retrieval baseline (35 golden questions, k=5)
 
@@ -146,7 +159,7 @@ npm run build                          # -> production build passes (static prer
 npm run dev                            # -> http://localhost:3000
 ```
 
-## Highlights so far
+## Engineering highlights
 
 - **Prompt-injection-aware extraction.** Untrusted source text is fenced in explicit markers in the *user* turn only (never the system prompt), with a system instruction that fenced text is data, not instructions.
 - **Closed, strict schemas.** JSON schemas are recursively closed (`additionalProperties: false` everywhere) so the model can't invent fields; enums are validated offline.
@@ -161,4 +174,4 @@ npm run dev                            # -> http://localhost:3000
 
 ---
 
-*Portfolio sprint. Northstar Analytics is fictional. Built by Dheeraj Pranav.*
+*Built by Dheeraj Pranav. Northstar Analytics is fictional and labelled as such throughout — no real person or company is represented.*
