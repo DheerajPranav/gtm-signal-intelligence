@@ -14,3 +14,7 @@ gtm_outbound.db
 .langfuse/
 *.db-journal
 .DS_Store
+
+# local batch run artifacts
+runs/batch_*.json
+runs/batch_*_companies.jsonl
